@@ -112,7 +112,7 @@ class livebox extends eqLogic {
 									$eqLogic->setConfiguration('ip',$client["IPAddress"]);
 									$eqLogic->setConfiguration('image',$eqLogic->getImage());
                                     $eqLogic->setConfiguration('deviceType',$client["DeviceType"]);
-                                    $eqLogic->setConfiguration('deviceType',$client["Active"]);
+                                    $eqLogic->setConfiguration('active',$client["Active"]);
 									$eqLogic->save();
 
 									if(!is_object($jsta)) { // NEW
@@ -463,9 +463,9 @@ class livebox extends eqLogic {
 		}
 	}
 
-	public function postUpdate() {
-		if ( $this->getIsEnable() ) {
-            if ($this->getConfiguration('type','') == 'box') {
+	public function postSave() {
+		if ($this->getConfiguration('type','') == 'box') {
+            if ( $this->getIsEnable() ) {
                 $content = $this->getPage("internet");
                 if ( $content !== false ) {
                     if ( $content["data"]["LinkType"] == "dsl" || $content["data"]["LinkType"] == "vdsl" ) {
@@ -1111,7 +1111,91 @@ class livebox extends eqLogic {
                 $this->logOut();
             }
         } else if ($this->getConfiguration('type','') == 'cli') {
-            
+            $cmd = $this->getCmd(null, 'lastseen');
+            if ( ! is_object($cmd)) {
+                $cmd = new liveboxCmd();
+                $cmd->setName('Vu dernière fois');
+                $cmd->setEqLogic_id($this->getId());
+                $cmd->setLogicalId('lastseen');
+                $cmd->setType('info');
+                $cmd->setSubType('string');
+                $cmd->setIsVisible(1);
+                $cmd->setIsHistorized(0);
+                $cmd->save();
+            }
+            $cmd = $this->getCmd(null, 'firstseen');
+            if ( ! is_object($cmd)) {
+                $cmd = new liveboxCmd();
+                $cmd->setName('Vu première Fois');
+                $cmd->setEqLogic_id($this->getId());
+                $cmd->setLogicalId('firstseen');
+                $cmd->setType('info');
+                $cmd->setSubType('string');
+                $cmd->setIsVisible(1);
+                $cmd->setIsHistorized(0);
+                $cmd->save();
+            }
+            $cmd = $this->getCmd(null, 'present');
+            if ( ! is_object($cmd)) {
+                $cmd = new liveboxCmd();
+                $cmd->setName('Présent');
+                $cmd->setEqLogic_id($this->getId());
+                $cmd->setLogicalId('present');
+                $cmd->setType('info');
+                $cmd->setSubType('binary');
+                $cmd->setIsVisible(1);
+                $cmd->setIsHistorized(1);
+                $cmd->save();
+            }
+            $cmd = $this->getCmd(null, 'ip');
+            if ( ! is_object($cmd)) {
+                $cmd = new liveboxCmd();
+                $cmd->setName('Adresse IP');
+                $cmd->setEqLogic_id($this->getId());
+                $cmd->setLogicalId('ip');
+                $cmd->setType('info');
+                $cmd->setSubType('string');
+                $cmd->setIsVisible(1);
+                $cmd->setIsHistorized(0);
+                $cmd->save();
+            }
+            $cmd = $this->getCmd(null, 'blocked');
+            if ( ! is_object($cmd)) {
+                $cmd = new liveboxCmd();
+                $cmd->setName('Bloqué');
+                $cmd->setEqLogic_id($this->getId());
+                $cmd->setLogicalId('blocked');
+                $cmd->setType('info');
+                $cmd->setSubType('binary');
+                $cmd->setIsVisible(1);
+                $cmd->setIsHistorized(1);
+                $cmd->save();
+            }
+            $cmdId = $cmd->getId();
+            $cmd = $this->getCmd(null, 'blockcli');
+            if ( ! is_object($cmd)) {
+                $cmd = new liveboxCmd();
+                $cmd->setName('Bloquer');
+                $cmd->setEqLogic_id($this->getId());
+                $cmd->setLogicalId('blockcli');
+                $cmd->setType('action');
+                $cmd->setSubType('other');
+                $cmd->setValue($cmdId);
+                $cmd->setIsVisible(1);
+                $cmd->save();
+            }
+            $cmd = $this->getCmd(null, 'unblockcli');
+            if ( ! is_object($cmd)) {
+                $cmd = new liveboxCmd();
+                $cmd->setName('Débloquer');
+                $cmd->setEqLogic_id($this->getId());
+                $cmd->setLogicalId('unblockcli');
+                $cmd->setType('action');
+                $cmd->setSubType('other');
+                $cmd->setValue($cmdId);
+                $cmd->setIsVisible(1);
+                $cmd->save();
+            }
         }
 	}
 
