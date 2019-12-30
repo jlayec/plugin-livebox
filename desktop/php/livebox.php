@@ -56,7 +56,7 @@ foreach ($eqLogics as $eqLogic) {
 			?>
 
 		</div>
-        <legend><i class="fas fa-table"></i> {{Mes Clients}} <span class="cursor eqLogicAction" style="color:#fcc127" data-action="discover" data-action2="clients" title="{{Scan Clients seulement}}"><i class="fas fa-bullseye"></i></span>&nbsp;<span class="cursor eqLogicAction" style="color:#fcc127" data-action="delete" data-action2="clients" title="{{Supprimer Clients non-actifs (et ignorer lors des prochaines sync)}}"><i class="fas fa-trash"></i></span></legend>
+        <legend><i class="fas fa-table"></i> {{Mes Clients}} <span class="cursor eqLogicAction" style="color:#fcc127" data-action="discover" data-action2="clients" title="{{Scanner les clients}}"><i class="fas fa-bullseye"></i></span>&nbsp;<span class="cursor eqLogicAction" style="color:#fcc127" data-action="delete" data-action2="clients" title="{{Supprimer Clients non-actifs (et ignorer lors des prochaines sync)}}"><i class="fas fa-trash"></i></span></legend>
         <div class="eqLogicThumbnailContainer">
 			<?php
 			if($has['cli']) {
@@ -72,7 +72,7 @@ foreach ($eqLogics as $eqLogic) {
                     echo '</div>';
                 }
 			} else {
-				echo "<br/><br/><br/><center><span style='color:#767676;font-size:1.2em;font-weight: bold;'>{{Scannez les stations pour les créer}}</span></center>";
+				echo "<br/><br/><br/><center><span style='color:#767676;font-size:1.2em;font-weight: bold;'>{{Scannez les clients pour les créer}}</span></center>";
             }
 			?>
 

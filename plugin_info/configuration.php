@@ -96,6 +96,28 @@ if (!isConnect()) {
 </form>
 
 <script>
+$('#bt_noMoreIgnore').on('click', function () {
+    $.ajax({// fonction permettant de faire de l'ajax
+        type: "POST", // methode de transmission des données au fichier php
+        url: "plugins/livebox/core/ajax/livebox.ajax.php", // url du fichier php
+        data: {
+            action: "noMoreIgnore",
+            what: "clients"
+        },
+        dataType: 'json',
+        error: function (request, status, error) {
+            handleAjaxError(request, status, error);
+        },
+        success: function (data) { // si l'appel a bien fonctionné
+        if (data.state != 'ok') {
+            $('#div_alert').showAlert({message: data.result, level: 'danger'});
+            return;
+        }
+        $('#div_alert').showAlert({message: '{{Action réussie}}', level: 'success'});
+      }
+    });
+});
+
 jeedom.config.load({
   configuration: 'favorites',
   plugin : 'livebox',

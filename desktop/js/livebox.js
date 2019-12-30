@@ -19,7 +19,6 @@ function printEqLogic(_eqLogic) {
 		_eqLogic.configuration = {};
 	}
 	$('#table_infoseqlogic tbody').empty();
-    printEqLogicHelper("{{Type}}","type",_eqLogic);
     printEqLogicHelper("{{Fabricant}}","manufacturer",_eqLogic);
     printEqLogicHelper("{{Type}}","productClass",_eqLogic);
     printEqLogicHelper("{{Modèle}}","modelName",_eqLogic);
@@ -176,14 +175,12 @@ $('#bt_goCarte').on('click', function() {
 
 $('.eqLogicAction[data-action=discover]').on('click', function (e) {
     var what=e.currentTarget.dataset.action2 || null;
-    var type=e.currentTarget.dataset.action3 || null;
     $.ajax({// fonction permettant de faire de l'ajax
         type: "POST", // methode de transmission des données au fichier php
         url: "plugins/livebox/core/ajax/livebox.ajax.php", // url du fichier php
         data: {
             action: "syncLivebox",
-            what: what,
-            type: type
+            what: what
         },
         dataType: 'json',
         error: function (request, status, error) {
