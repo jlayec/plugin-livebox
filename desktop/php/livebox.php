@@ -4,6 +4,14 @@ if (!isConnect('admin')) {
 }
 sendVarToJS('eqType', 'livebox');
 $eqLogics = eqLogic::byType('livebox');
+
+$has = ["box"=>false,"cli"=>false];
+foreach ($eqLogics as $eqLogic) {
+	$type=$eqLogic->getConfiguration('type','');
+	if($type) {
+        $has[$type]=true;
+    }
+}
 ?>
 
 <div class="row row-overflow">
@@ -19,25 +27,55 @@ $eqLogics = eqLogic::byType('livebox');
 				<i class="fas fa-wrench"></i>
 				<br>
 				<span>{{Configuration}}</span>
-	  </div>
+            </div>
+            <div class="cursor logoSecondary" id="bt_healthlivebox">
+				<i class="fas fa-medkit"></i>
+				<br />
+				<span>{{Santé}}</span>
+			</div>
 	</div>
         <legend><i class="fas fa-table"></i>{{Mes Livebox}}
         </legend>
 		<div class="eqLogicThumbnailContainer">
 			<?php
-			if (count($eqLogics) == 0) {
-				echo "<br/><br/><br/><center><span style='color:#767676;font-size:1.2em;font-weight: bold;'>{{Vous n'avez pas encore de Livebox, cliquez sur Ajouter un équipement pour commencer}}</span></center>";
-			} else {
+			if($has['box']) {
                 foreach ($eqLogics as $eqLogic) {
-                    echo '<div class="eqLogicDisplayCard cursor" data-eqLogic_id="' . $eqLogic->getId() . '" style="background-color : #ffffff; height : 200px;margin-bottom : 10px;padding : 5px;border-radius: 2px;width : 160px;margin-left : 10px;" >';
-                    echo "<center>";
-                    echo '<img src="plugins/livebox/plugin_info/livebox_icon.png" height="105" width="95" />';
-                    echo "</center>";
-                    echo '<span style="font-size : 1.1em;position:relative; top : 15px;word-break: break-all;white-space: pre-wrap;word-wrap: break-word;"><center>' . $eqLogic->getHumanName(true, true) . '</center></span>';
+                    if($eqLogic->getConfiguration('type','') != 'box') {
+                        continue;
+                    }
+                    $opacity = ($eqLogic->getIsEnable()) ? '' : 'disableCard';
+                    echo '<div class="eqLogicDisplayCard cursor '.$opacity.'" data-eqLogic_id="' . $eqLogic->getId() . '">';
+                    echo '<img src="' . $eqLogic->getImage() . '"/>';
+                    echo '<br>';
+                    echo '<span class="name">' . $eqLogic->getHumanName(true, true) . '</span>';
                     echo '</div>';
                 }
-			}
+			} else {
+				echo "<br/><br/><br/><center><span style='color:#767676;font-size:1.2em;font-weight: bold;'>{{Vous n'avez pas encore de Livebox, cliquez sur Ajouter un équipement pour commencer}}</span></center>";
+            }
 			?>
+
+		</div>
+        <legend><i class="fas fa-table"></i> {{Mes Clients}} <span class="cursor eqLogicAction" style="color:#fcc127" data-action="discover" data-action2="clients" title="{{Scan Clients seulement}}"><i class="fas fa-bullseye"></i></span>&nbsp;<span class="cursor eqLogicAction" style="color:#fcc127" data-action="delete" data-action2="clients" title="{{Supprimer Clients non-actifs (et ignorer lors des prochaines sync)}}"><i class="fas fa-trash"></i></span></legend>
+        <div class="eqLogicThumbnailContainer">
+			<?php
+			if($has['cli']) {
+                foreach ($eqLogics as $eqLogic) {
+                    if($eqLogic->getConfiguration('type','') != 'cli') {
+                        continue;
+                    }
+                    $opacity = ($eqLogic->getIsEnable()) ? '' : 'disableCard';
+                    echo '<div class="eqLogicDisplayCard cursor '.$opacity.'" data-eqLogic_id="' . $eqLogic->getId() . '">';
+                    echo '<img src="' . $eqLogic->getImage() . '"/>';
+                    echo '<br>';
+                    echo '<span class="name">' . $eqLogic->getHumanName(true, true) . '</span>';
+                    echo '</div>';
+                }
+			} else {
+				echo "<br/><br/><br/><center><span style='color:#767676;font-size:1.2em;font-weight: bold;'>{{Scannez les stations pour les créer}}</span></center>";
+            }
+			?>
+
 		</div>
     </div>
 </div>

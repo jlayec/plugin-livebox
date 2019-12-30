@@ -1,3 +1,8 @@
+ $('#bt_healthlivebox').on('click', function () {
+    $('#md_modal').dialog({title: "{{Santé Livebox}}"});
+    $('#md_modal').load('index.php?v=d&plugin=livebox&modal=health').dialog('open');
+});
+
 function printEqLogicHelper(label,name,_eqLogic){
 	var trm = '<tr><td class="col-sm-3"><span style="font-size : 1em;">'+label+'</span></td><td><span class="label label-default" style="font-size : 1em;"> <span class="eqLogicAttr" data-l1key="configuration" data-l2key="'+name+'"></span></span></td></tr>';
 	
@@ -14,12 +19,14 @@ function printEqLogic(_eqLogic) {
 		_eqLogic.configuration = {};
 	}
 	$('#table_infoseqlogic tbody').empty();
+    printEqLogicHelper("{{Type}}","type",_eqLogic);
     printEqLogicHelper("{{Fabricant}}","manufacturer",_eqLogic);
     printEqLogicHelper("{{Type}}","productClass",_eqLogic);
     printEqLogicHelper("{{Modèle}}","modelName",_eqLogic);
     printEqLogicHelper("{{Numéro de série}}","serialNumber",_eqLogic);
     printEqLogicHelper("{{Version hardware}}","hardwareVersion",_eqLogic);
     printEqLogicHelper("{{Version software}}","softwareVersion",_eqLogic);
+    printEqLogicHelper("{{Adresse MAC}}","BaseMAC",_eqLogic);
 
     printScheduling(_eqLogic);
 }
@@ -165,6 +172,60 @@ function addCmdToTable(_cmd) {
 $('#bt_goCarte').on('click', function() {
     $('#md_modal').dialog({title: "{{Accèder à l'interface de la livebox}}"});
 	window.open('http://'+$('.eqLogicAttr[data-l2key=ip]').value()+'/');
+});
+
+$('.eqLogicAction[data-action=discover]').on('click', function (e) {
+    var what=e.currentTarget.dataset.action2 || null;
+    var type=e.currentTarget.dataset.action3 || null;
+    $.ajax({// fonction permettant de faire de l'ajax
+        type: "POST", // methode de transmission des données au fichier php
+        url: "plugins/livebox/core/ajax/livebox.ajax.php", // url du fichier php
+        data: {
+            action: "syncLivebox",
+            what: what,
+            type: type
+        },
+        dataType: 'json',
+        error: function (request, status, error) {
+            handleAjaxError(request, status, error);
+        },
+        success: function (data) { // si l'appel a bien fonctionné
+            if (data.state != 'ok') {
+                $('#div_alert').showAlert({message: data.result, level: 'danger'});
+                return;
+            }
+            $('#div_alert').showAlert({message: '{{Synchronisation réussie}} : '+what, level: 'success'});
+            location.reload();
+      }
+    });
+});
+
+$('.eqLogicAction[data-action=delete]').on('click', function (e) {
+    var what=e.currentTarget.dataset.action2;
+    bootbox.confirm('{{Cette action supprimera les '+what+' désactivés (grisés)<br/>Ceux-ci seront ignorés lors des prochains scans<br/>Pour réinitialiser les ignorés, allez dans la configuration du plugin}}', function(result) {
+        if (result) {
+            $.ajax({// fonction permettant de faire de l'ajax
+                type: "POST", // methode de transmission des données au fichier php
+                url: "plugins/livebox/core/ajax/livebox.ajax.php", // url du fichier php
+                data: {
+                    action: "deleteDisabledEQ",
+                    what: what
+                },
+                dataType: 'json',
+                error: function (request, status, error) {
+                    handleAjaxError(request, status, error);
+                },
+                success: function (data) { // si l'appel a bien fonctionné
+                if (data.state != 'ok') {
+                    $('#div_alert').showAlert({message: data.result, level: 'danger'});
+                    return;
+                }
+                $('#div_alert').showAlert({message: '{{Suppression réussie}} : '+what, level: 'success'});
+                location.reload();
+              }
+            });
+        }
+    });
 });
 
 $("#table_cmd").sortable({axis: "y", cursor: "move", items: ".cmd", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});

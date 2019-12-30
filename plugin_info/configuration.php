@@ -25,6 +25,37 @@ if (!isConnect()) {
 
 <form class="form-horizontal">
 	<fieldset>
+		<legend>
+			<i class="fa fa-list-alt"></i> {{Paramètres}}
+		</legend>
+		<div class="form-group">
+		  <label class="col-lg-4 control-label" >{{Pièce par défaut pour les Clients}}</label>
+		  <div class="col-lg-3">
+			<select id="sel_object" class="configKey form-control" data-l1key="defaultParentObject">
+			  <option value="">{{Aucune}}</option>
+			  <?php
+				foreach (jeeObject::all() as $object) {
+				  echo '<option value="' . $object->getId() . '">' . $object->getName() . '</option>';
+				}
+			  ?>
+			</select>
+		  </div>
+		</div>
+<?php
+	$ignoredClients=config::byKey('ignoredClients','livebox',[],true);
+	if(count($ignoredClients)) :
+?>
+		<div class="form-group">
+			<label class="col-lg-4 control-label">{{Réinitialiser}}</label>
+			<div class="col-lg-3">
+				<a class="btn btn-default" id="bt_noMoreIgnore"><i class='fa fa-trash'></i> {{Ne plus ignorer les clients supprimés}}</a>
+			</div>
+		</div>
+<?php
+	endif;
+?>
+	</fieldset>
+	<fieldset>
 		<div class="form-group">
 			<label class="col-sm-4 control-label">{{Utiliser Pages jaunes}}</label>
 			<div class="col-sm-2">
@@ -45,7 +76,7 @@ if (!isConnect()) {
 	<legend>{{Favoris}}
 	  <a class="btn btn-xs btn-success pull-right" id="bt_addFavorite"><i class="fas fa-plus"></i> {{Ajouter}}</a>
 	</legend>
-	<table class="table table-bordered table-condensed" id="table_favorites" style="width:50% !important;"">
+	<table class="table table-bordered table-condensed" id="table_favorites" style="width:50% !important;">
 	  <thead>
 		<tr>
 		  <th style="display: none; witdh: auto;">{{Id}}</th>
@@ -65,57 +96,43 @@ if (!isConnect()) {
 </form>
 
 <script>
-	function getFavorites() {
-		$.ajax({
-			type: "POST",
-			url: "plugins/livebox/core/ajax/livebox.ajax.php",
-			data: {
-			  action: "getFavorites",
-			},
-			dataType: 'json',
-			global: false,
-			error: function (request, status, error) {
-			  handleAjaxError(request, status, error);
-			},
-			success: function (data) {
-				if(data === false){
-				  return;
-				}
-				if (data.state != 'ok') {
-					$('#div_alert').showAlert({
-					  message: data.result,
-					  level: 'danger'
-					});
-					return;
-				}
-				var tr='';
-				for(var i in data.result){
-				  tr += '<tr class="favorite">';
-				  tr += '<td style="display: none; witdh: auto;">';
-				  tr += '<input class="form-control favoriteAttr" data-l1key="id" value="'+data.result[i].id+'" disabled />';
-				  tr += '</td>';
-				  tr += '<td>';
-				  tr += '<input class="form-control favoriteAttr" data-l1key="callerName" value="'+data.result[i].callerName+'" />';
-				  tr += '</td>';
-				  tr += '<td>';
-				  tr += '<input class="form-control favoriteAttr" data-l1key="phone" value="'+data.result[i].phone+'" />';
-				  tr += '</td>';
-				  tr += '<td style="display: none; witdh: auto;">';
-				  tr += '<input class="form-control favoriteAttr" data-l1key="startDate" value="'+data.result[i].startDate+'" disabled />';
-				  tr += '</td>';
-				  tr += '<td style="display: none; witdh: auto;">';
-				  tr += '<input class="form-control favoriteAttr" data-l1key="isFetched" value="'+data.result[i].isFetched+'" disabled />';
-				  tr += '</td>';
-				  tr += '<td style="display: none; witdh: auto;">';
-				  tr += '<input class="form-control favoriteAttr" data-l1key="favorite" value="'+data.result[i].favorite+'" disabled />';
-				  tr += '</td>';
-				  tr += '<td>';
-				  tr += '<a class="btn btn-default btn-xs bt_removeFavorite pull-right"><i class="fas fa-minus"></i></a>';
-				}
-				$('#table_favorites tbody').empty().append(tr);
-			}
-		});
-	};
+jeedom.config.load({
+  configuration: 'favorites',
+  plugin : 'livebox',
+  error: function (error) {
+    $('#div_alert').showAlert({message: error.message, level: 'danger'});
+  },
+  success: function (data) {
+    if(data === false){
+      return;
+    }
+    var tr='';
+    for(var i in data){
+          tr += '<tr class="favorite">';
+          tr += '<td style="display: none; witdh: auto;">';
+          tr += '<input class="form-control favoriteAttr" data-l1key="id" value="'+data.result[i].id+'" disabled />';
+          tr += '</td>';
+          tr += '<td>';
+          tr += '<input class="form-control favoriteAttr" data-l1key="callerName" value="'+data.result[i].callerName+'" />';
+          tr += '</td>';
+          tr += '<td>';
+          tr += '<input class="form-control favoriteAttr" data-l1key="phone" value="'+data.result[i].phone+'" />';
+          tr += '</td>';
+          tr += '<td style="display: none; witdh: auto;">';
+          tr += '<input class="form-control favoriteAttr" data-l1key="startDate" value="'+data.result[i].startDate+'" disabled />';
+          tr += '</td>';
+          tr += '<td style="display: none; witdh: auto;">';
+          tr += '<input class="form-control favoriteAttr" data-l1key="isFetched" value="'+data.result[i].isFetched+'" disabled />';
+          tr += '</td>';
+          tr += '<td style="display: none; witdh: auto;">';
+          tr += '<input class="form-control favoriteAttr" data-l1key="favorite" value="'+data.result[i].favorite+'" disabled />';
+          tr += '</td>';
+          tr += '<td>';
+          tr += '<a class="btn btn-default btn-xs bt_removeFavorite pull-right"><i class="fas fa-minus"></i></a>';
+	}
+	$('#table_favorites tbody').empty().append(tr);
+  }
+});
 
 function livebox_postSaveConfiguration(){
   var favorites = $('#table_favorites .favorite').getValues('.favoriteAttr');
@@ -148,8 +165,6 @@ function livebox_postSaveConfiguration(){
 	}
   });
 }
-
-getFavorites();
 
 $('#bt_addFavorite').off('click').on('click',function(){
   var tr = '<tr class="favorite">';

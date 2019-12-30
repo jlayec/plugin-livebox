@@ -61,7 +61,119 @@ class livebox extends eqLogic {
 			}
 		}
 	}
+	public static function nameExists($name) {
+			$allLivebox=eqLogic::byType('livebox');
+			foreach($allLivebox as $u) {
+				if($name == $u->getName()) return true;
+			}
+			return false;
+	}
 
+	public static function syncLivebox($what='all') {
+		log::add('livebox', 'info', "syncLivebox");
+		
+		$defaultRoom = intval(config::byKey('defaultParentObject','livebox','',true));
+		
+		if($what == 'all' || $what == 'clients') {
+			
+			$stas = $controller->list_clients();
+			
+			foreach($stas as $sta) {
+				$ignoredClients=config::byKey('ignoredClients','livebox',[],true);
+				$mac = $sta->mac;
+				
+				if(!in_array($mac,$ignoredClients)) {
+				
+					$name= ((isset($sta->name) && $sta->name)?$sta->name:((isset($sta->hostname) && $sta->hostname)?$sta->hostname:(($sta->ip)?$sta->ip:$mac)));
+					
+					if(self::nameExists($name)) {
+						log::add('livebox', 'debug', "Nom en double ".$name." renommé en ".$name.'_'.$mac);
+						$name=$name.'_'.$mac;
+					}
+					
+					$jsta = livebox::byLogicalId($mac, 'livebox');
+					if (!is_object($jsta)) {
+						log::add('livebox', 'info', "Trouvé Client ".$name."(".$mac."):".json_encode($sta));
+						$eqLogic = new livebox();
+						$eqLogic->setName($name);
+						$eqLogic->setIsEnable(0);
+						$eqLogic->setIsVisible(0);
+						$eqLogic->setLogicalId($mac);
+						$eqLogic->setEqType_name('livebox');
+						if($defaultRoom) $eqLogic->setObject_id($defaultRoom);
+						$eqLogic->setConfiguration('type', 'cli');
+						$eqLogic->setConfiguration('device_id',$sta->_id);
+						$eqLogic->setConfiguration('oui',$sta->oui);
+						$eqLogic->setConfiguration('mac',$mac);
+					} else {
+						log::add('livebox', 'info', "Mise à jour Client ".$name."(".$mac."):".json_encode($sta));
+						$eqLogic = $jsta;
+					}
+					$eqLogic->setConfiguration('image',$eqLogic->getImage());
+
+					$eqLogic->setConfiguration('ip', $sta->ip);
+					if(isset($sta->is_wired)) $eqLogic->setConfiguration('model',(($sta->is_wired)?'wired':'wireless'));
+					if(isset($sta->hostname)) $eqLogic->setConfiguration('modelName',$sta->hostname);
+					
+					if(isset($sta->is_wired) && $sta->is_wired) {
+						if(isset($sta->sw_port)) $eqLogic->setConfiguration('sw_port',$sta->sw_port);
+						if(isset($sta->sw_mac)) $eqLogic->setConfiguration('sw_mac',$sta->sw_mac);
+					} else {
+						if(isset($sta->sw_port)) $eqLogic->setConfiguration('sw_port',$sta->sw_port);
+						if(isset($sta->ap_mac)) $eqLogic->setConfiguration('ap_mac',$sta->ap_mac);
+					}
+					if(isset($sta->gw_mac)) $eqLogic->setConfiguration('gw_mac',$sta->gw_mac);
+				
+					$eqLogic->save();
+						
+					if(!is_object($jsta)) { // NEW
+						event::add('jeedom::alert', array(
+							'level' => 'warning',
+							'page' => 'livebox',
+							'message' => __('Client inclus avec succès : ' .$name, __FILE__),
+						));
+					} else { // UPDATED
+						event::add('jeedom::alert', array(
+							'level' => 'warning',
+							'page' => 'livebox',
+							'message' => __('Client mis à jour avec succès : ' .$name, __FILE__),
+						));
+					}			
+				}
+			}
+		}
+	}	
+    
+	public static function deleteDisabledEQ($what = 'clients') {
+		log::add('livebox', 'info', "deleteDisabledEQ");
+
+		$ignoredNew=[];
+		if($what == 'all' || $what == 'clients') {
+			$eqLogics = eqLogic::byType('livebox');
+			foreach ($eqLogics as $eqLogic) {
+				if($eqLogic->getConfiguration('type','') != 'cli') continue;
+				if ($eqLogic->getIsEnable() != 1) {
+					$ignoredNew[]=$eqLogic->getLogicalId();
+					$eqLogic->remove();
+				}
+			}
+			if(count($ignoredNew)) {
+				log::add('livebox', 'debug', "ignoredNew :".json_encode($ignoredNew));
+				$ignoredBefore=config::byKey('ignoredClients','livebox',[],true);
+				if($ignoredBefore==null) $ignoredBefore=[];
+				log::add('livebox', 'debug', "ignoredBefore :".json_encode($ignoredBefore));
+				$ignoredClients = array_unique(array_merge($ignoredBefore,$ignoredNew),SORT_REGULAR);
+				log::add('livebox', 'debug', "ignoredClients :".json_encode($ignoredClients));
+				config::save('ignoredClients',$ignoredClients,'livebox');
+			}
+		}
+		
+	}
+	public static function noMoreIgnore($what = 'clients') {
+		//config::save('ignoredClients','[]','unifi');
+		config::remove('ignoredClients','livebox');
+	}
+    
 	function getCookiesInfo() {
 		if ( ! isset($this->_cookies) )
 		{
@@ -329,6 +441,9 @@ class livebox extends eqLogic {
 		{
 			$result = $this->getCookiesInfo();
 			if ($result) {
+                if ($this->getConfiguration('type') == '') {
+                    $this->setConfiguration('type', 'box');
+                }
 				$content = $this->getPage("deviceinfo");
 				if ( $content !== false ) {
 					if (isset($content['status']['ProductClass'])) {
@@ -348,6 +463,9 @@ class livebox extends eqLogic {
 					}
 					if (isset($content['status']['SoftwareVersion'])) {
 						$this->setConfiguration('softwareVersion', $content['status']['SoftwareVersion']);
+					}
+					if (isset($content['status']['BaseMAC'])) {
+						$this->setConfiguration('BaseMAC', $content['status']['BaseMAC']);
 					}
 				}
 			}
@@ -1003,8 +1121,15 @@ class livebox extends eqLogic {
 		}
 	}
 
+    public function getImage() {
+        if($this->getConfiguration('type') == 'cli'){
+            return 'plugins/livebox/core/config/cli/wired/icon.png';
+        }
+        return 'plugins/livebox/plugin_info/livebox_icon.png';
+    }
+
 	public function scan() {
-		if ( $this->getIsEnable() ) {
+		if ( $this->getIsEnable() && $this->getConfiguration('type') == 'box') {
 			if ( $this->getCookiesInfo() ) {
 				$this->refreshInfo();
 				$this->logOut();
