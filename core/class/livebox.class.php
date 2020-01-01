@@ -109,10 +109,10 @@ class livebox extends eqLogic {
 										log::add('livebox', 'info', "Mise à jour Client ".$name."(".$mac."):".json_encode($client));
 										$eqLogic = $jsta;
 									}
-									$eqLogic->setConfiguration('ip',$client["IPAddress"]);
+									$eqLogic->setConfiguration('ipAddress',$client["IPAddress"]);
 									$eqLogic->setConfiguration('image',$eqLogic->getImage());
-                                    $eqLogic->setConfiguration('deviceType',$client["DeviceType"]);
-                                    $eqLogic->setConfiguration('active',$client["Active"]);
+									$eqLogic->setConfiguration('deviceType',$client["DeviceType"]);
+									$eqLogic->setConfiguration('active',$client["Active"]);
 									$eqLogic->save();
 
 									if(!is_object($jsta)) { // NEW
@@ -465,743 +465,754 @@ class livebox extends eqLogic {
 
 	public function postSave() {
 		if ($this->getConfiguration('type','') == 'box') {
-            if ( $this->getIsEnable() ) {
-                $content = $this->getPage("internet");
-                if ( $content !== false ) {
-                    if ( $content["data"]["LinkType"] == "dsl" || $content["data"]["LinkType"] == "vdsl" ) {
-                        log::add('livebox','debug','Connexion mode dsl ou vdsl');
-                        $cmd = $this->getCmd(null, 'debitmontant');
-                        if ( ! is_object($cmd)) {
-                            $cmd = new liveboxCmd();
-                            $cmd->setName('Debit montant');
-                            $cmd->setEqLogic_id($this->getId());
-                            $cmd->setLogicalId('debitmontant');
-                            $cmd->setUnite('Kb/s');
-                            $cmd->setType('info');
-                            $cmd->setSubType('numeric');
-                            $cmd->setIsHistorized(0);
-                            $cmd->save();
-                        }
+			if ( $this->getIsEnable() ) {
+				$content = $this->getPage("internet");
+				if ( $content !== false ) {
+					if ( $content["data"]["LinkType"] == "dsl" || $content["data"]["LinkType"] == "vdsl" ) {
+						log::add('livebox','debug','Connexion mode dsl ou vdsl');
+						$cmd = $this->getCmd(null, 'debitmontant');
+						if ( ! is_object($cmd)) {
+							$cmd = new liveboxCmd();
+							$cmd->setName('Debit montant');
+							$cmd->setEqLogic_id($this->getId());
+							$cmd->setLogicalId('debitmontant');
+							$cmd->setUnite('Kb/s');
+							$cmd->setType('info');
+							$cmd->setSubType('numeric');
+							$cmd->setIsHistorized(0);
+							$cmd->save();
+						}
 
-                        $cmd = $this->getCmd(null, 'debitdescendant');
-                        if ( ! is_object($cmd)) {
-                            $cmd = new liveboxCmd();
-                            $cmd->setName('Debit descendant');
-                            $cmd->setEqLogic_id($this->getId());
-                            $cmd->setLogicalId('debitdescendant');
-                            $cmd->setUnite('Kb/s');
-                            $cmd->setType('info');
-                            $cmd->setSubType('numeric');
-                            $cmd->setIsHistorized(0);
-                            $cmd->save();
-                        }
-                        $cmd = $this->getCmd(null, 'margebruitmontant');
-                        if ( ! is_object($cmd)) {
-                            $cmd = new liveboxCmd();
-                            $cmd->setName('Marge de bruit montant');
-                            $cmd->setEqLogic_id($this->getId());
-                            $cmd->setLogicalId('margebruitmontant');
-                            $cmd->setUnite('dB');
-                            $cmd->setType('info');
-                            $cmd->setSubType('numeric');
-                            $cmd->setIsHistorized(1);
-                            $cmd->save();
-                        }
+						$cmd = $this->getCmd(null, 'debitdescendant');
+						if ( ! is_object($cmd)) {
+							$cmd = new liveboxCmd();
+							$cmd->setName('Debit descendant');
+							$cmd->setEqLogic_id($this->getId());
+							$cmd->setLogicalId('debitdescendant');
+							$cmd->setUnite('Kb/s');
+							$cmd->setType('info');
+							$cmd->setSubType('numeric');
+							$cmd->setIsHistorized(0);
+							$cmd->save();
+						}
+						$cmd = $this->getCmd(null, 'margebruitmontant');
+						if ( ! is_object($cmd)) {
+							$cmd = new liveboxCmd();
+							$cmd->setName('Marge de bruit montant');
+							$cmd->setEqLogic_id($this->getId());
+							$cmd->setLogicalId('margebruitmontant');
+							$cmd->setUnite('dB');
+							$cmd->setType('info');
+							$cmd->setSubType('numeric');
+							$cmd->setIsHistorized(1);
+							$cmd->save();
+						}
 
-                        $cmd = $this->getCmd(null, 'margebruitdescendant');
-                        if ( ! is_object($cmd)) {
-                            $cmd = new liveboxCmd();
-                            $cmd->setName('Marge de bruit descendant');
-                            $cmd->setEqLogic_id($this->getId());
-                            $cmd->setLogicalId('margebruitdescendant');
-                            $cmd->setUnite('dB');
-                            $cmd->setType('info');
-                            $cmd->setSubType('numeric');
-                            $cmd->setIsHistorized(0);
-                            $cmd->save();
-                        }
-                        $cmd = $this->getCmd(null, 'lastchange');
-                        if ( ! is_object($cmd)) {
-                            $cmd = new liveboxCmd();
-                            $cmd->setName('Durée de la synchronisation DSL');
-                            $cmd->setEqLogic_id($this->getId());
-                            $cmd->setLogicalId('lastchange');
-                            $cmd->setUnite('s');
-                            $cmd->setType('info');
-                            $cmd->setSubType('numeric');
-                            $cmd->setIsHistorized(1);
-                            if ( version_compare(jeedom::version(), "4", "<")) {
-                                $cmd->setTemplate('dashboard', 'dureev3');
-                                $cmd->setTemplate('mobile', 'dureev3');
-                            } else {
-                                $cmd->setTemplate('dashboard', 'livebox::duree');
-                                $cmd->setTemplate('mobile', 'livebox::duree');
-                            }
-                            $cmd->save();
-                        }
+						$cmd = $this->getCmd(null, 'margebruitdescendant');
+						if ( ! is_object($cmd)) {
+							$cmd = new liveboxCmd();
+							$cmd->setName('Marge de bruit descendant');
+							$cmd->setEqLogic_id($this->getId());
+							$cmd->setLogicalId('margebruitdescendant');
+							$cmd->setUnite('dB');
+							$cmd->setType('info');
+							$cmd->setSubType('numeric');
+							$cmd->setIsHistorized(0);
+							$cmd->save();
+						}
+						$cmd = $this->getCmd(null, 'lastchange');
+						if ( ! is_object($cmd)) {
+							$cmd = new liveboxCmd();
+							$cmd->setName('Durée de la synchronisation DSL');
+							$cmd->setEqLogic_id($this->getId());
+							$cmd->setLogicalId('lastchange');
+							$cmd->setUnite('s');
+							$cmd->setType('info');
+							$cmd->setSubType('numeric');
+							$cmd->setIsHistorized(1);
+							if ( version_compare(jeedom::version(), "4", "<")) {
+								$cmd->setTemplate('dashboard', 'dureev3');
+								$cmd->setTemplate('mobile', 'dureev3');
+							} else {
+								$cmd->setTemplate('dashboard', 'livebox::duree');
+								$cmd->setTemplate('mobile', 'livebox::duree');
+							}
+							$cmd->save();
+						}
 
-                    } elseif ( $content->data->LinkType == "ethernet" ) {
-                        log::add('livebox','debug','Connexion mode ethernet');
-                        $cmd = $this->getCmd(null, 'debitmontant');
-                        if ( is_object($cmd)) {
-                            $cmd->remove();
-                        }
+					} elseif ( $content->data->LinkType == "ethernet" ) {
+						log::add('livebox','debug','Connexion mode ethernet');
+						$cmd = $this->getCmd(null, 'debitmontant');
+						if ( is_object($cmd)) {
+							$cmd->remove();
+						}
 
-                        $cmd = $this->getCmd(null, 'debitdescendant');
-                        if ( is_object($cmd)) {
-                            $cmd->remove();
-                        }
+						$cmd = $this->getCmd(null, 'debitdescendant');
+						if ( is_object($cmd)) {
+							$cmd->remove();
+						}
 
-                        $cmd = $this->getCmd(null, 'margebruitmontant');
-                        if ( is_object($cmd)) {
-                            $cmd->remove();
-                        }
+						$cmd = $this->getCmd(null, 'margebruitmontant');
+						if ( is_object($cmd)) {
+							$cmd->remove();
+						}
 
-                        $cmd = $this->getCmd(null, 'margebruitdescendant');
-                        if ( is_object($cmd)) {
-                            $cmd->remove();
-                        }
+						$cmd = $this->getCmd(null, 'margebruitdescendant');
+						if ( is_object($cmd)) {
+							$cmd->remove();
+						}
 
-                        $cmd = $this->getCmd(null, 'lastchange');
-                        if ( is_object($cmd)) {
-                            $cmd->remove();
-                        }
-                    }
-                }
-                $content = $this->getPage("wifilist");
-                if ( $content !== false ) {
-                    if ( count($content["status"]) == 1 ) {
-                        log::add('livebox','debug','Mode Wifi');
-                        $cmd = $this->getCmd(null, 'wifion');
-                        if ( ! is_object($cmd) ) {
-                            $cmd = new liveboxCmd();
-                            $cmd->setName('Activer wifi');
-                            $cmd->setEqLogic_id($this->getId());
-                            $cmd->setType('action');
-                            $cmd->setSubType('other');
-                            $cmd->setLogicalId('wifion');
-                            $cmd->save();
-                        }
-                        $cmd = $this->getCmd(null, 'wifioff');
-                        if ( ! is_object($cmd) ) {
-                            $cmd = new liveboxCmd();
-                            $cmd->setName('Désactiver wifi');
-                            $cmd->setEqLogic_id($this->getId());
-                            $cmd->setType('action');
-                            $cmd->setSubType('other');
-                            $cmd->setLogicalId('wifioff');
-                            $cmd->save();
-                        }
-                        $cmd = $this->getCmd(null, 'wifi2.4on');
-                        if ( is_object($cmd)) {
-                            $cmd->remove();
-                        }
+						$cmd = $this->getCmd(null, 'lastchange');
+						if ( is_object($cmd)) {
+							$cmd->remove();
+						}
+					}
+				}
+				$content = $this->getPage("wifilist");
+				if ( $content !== false ) {
+					if ( count($content["status"]) == 1 ) {
+						log::add('livebox','debug','Mode Wifi');
+						$cmd = $this->getCmd(null, 'wifion');
+						if ( ! is_object($cmd) ) {
+							$cmd = new liveboxCmd();
+							$cmd->setName('Activer wifi');
+							$cmd->setEqLogic_id($this->getId());
+							$cmd->setType('action');
+							$cmd->setSubType('other');
+							$cmd->setLogicalId('wifion');
+							$cmd->save();
+						}
+						$cmd = $this->getCmd(null, 'wifioff');
+						if ( ! is_object($cmd) ) {
+							$cmd = new liveboxCmd();
+							$cmd->setName('Désactiver wifi');
+							$cmd->setEqLogic_id($this->getId());
+							$cmd->setType('action');
+							$cmd->setSubType('other');
+							$cmd->setLogicalId('wifioff');
+							$cmd->save();
+						}
+						$cmd = $this->getCmd(null, 'wifi2.4on');
+						if ( is_object($cmd)) {
+							$cmd->remove();
+						}
 
-                        $cmd = $this->getCmd(null, 'wifi2.4off');
-                        if ( is_object($cmd)) {
-                            $cmd->remove();
-                        }
-                        $cmd = $this->getCmd(null, 'wifi5on');
-                        if ( is_object($cmd)) {
-                            $cmd->remove();
-                        }
+						$cmd = $this->getCmd(null, 'wifi2.4off');
+						if ( is_object($cmd)) {
+							$cmd->remove();
+						}
+						$cmd = $this->getCmd(null, 'wifi5on');
+						if ( is_object($cmd)) {
+							$cmd->remove();
+						}
 
-                        $cmd = $this->getCmd(null, 'wifi5off');
-                        if ( is_object($cmd)) {
-                            $cmd->remove();
-                        }
-                        $cmd = $this->getCmd(null, 'wifistatus');
-                        if ( ! is_object($cmd)) {
-                            $cmd = new liveboxCmd();
-                            $cmd->setName('Etat Wifi');
-                            $cmd->setEqLogic_id($this->getId());
-                            $cmd->setLogicalId('wifistatus');
-                            $cmd->setUnite('');
-                            $cmd->setType('info');
-                            $cmd->setSubType('binary');
-                            $cmd->setIsHistorized(0);
-                            $cmd->save();
-                        }
-                        $cmd = $this->getCmd(null, 'wifi5status');
-                        if ( is_object($cmd)) {
-                            $cmd->remove();
-                        }
+						$cmd = $this->getCmd(null, 'wifi5off');
+						if ( is_object($cmd)) {
+							$cmd->remove();
+						}
+						$cmd = $this->getCmd(null, 'wifistatus');
+						if ( ! is_object($cmd)) {
+							$cmd = new liveboxCmd();
+							$cmd->setName('Etat Wifi');
+							$cmd->setEqLogic_id($this->getId());
+							$cmd->setLogicalId('wifistatus');
+							$cmd->setUnite('');
+							$cmd->setType('info');
+							$cmd->setSubType('binary');
+							$cmd->setIsHistorized(0);
+							$cmd->save();
+						}
+						$cmd = $this->getCmd(null, 'wifi5status');
+						if ( is_object($cmd)) {
+							$cmd->remove();
+						}
 
-                        $cmd = $this->getCmd(null, 'wifi2.4status');
-                        if ( is_object($cmd)) {
-                            $cmd->remove();
-                        }
-                    } elseif ( count($content["status"]) == 2 ) {
-                        log::add('livebox','debug','Mode Wifi 2.4 et 5');
-                        $cmd = $this->getCmd(null, 'wifi2.4on');
-                        if ( ! is_object($cmd) ) {
-                            $cmd = new liveboxCmd();
-                            $cmd->setName('Activer wifi 2.4G');
-                            $cmd->setEqLogic_id($this->getId());
-                            $cmd->setType('action');
-                            $cmd->setSubType('other');
-                            $cmd->setLogicalId('wifi2.4on');
-                            $cmd->save();
-                        }
-                        $cmd = $this->getCmd(null, 'wifi5on');
-                        if ( ! is_object($cmd) ) {
-                            $cmd = new liveboxCmd();
-                            $cmd->setName('Activer wifi 5G');
-                            $cmd->setEqLogic_id($this->getId());
-                            $cmd->setType('action');
-                            $cmd->setSubType('other');
-                            $cmd->setLogicalId('wifi5on');
-                            $cmd->save();
-                        }
-                        $cmd = $this->getCmd(null, 'wifi2.4off');
-                        if ( ! is_object($cmd) ) {
-                            $cmd = new liveboxCmd();
-                            $cmd->setName('Désactiver wifi 2.4G');
-                            $cmd->setEqLogic_id($this->getId());
-                            $cmd->setType('action');
-                            $cmd->setSubType('other');
-                            $cmd->setLogicalId('wifi2.4off');
-                            $cmd->save();
-                        }
-                        $cmd = $this->getCmd(null, 'wifi5off');
-                        if ( ! is_object($cmd) ) {
-                            $cmd = new liveboxCmd();
-                            $cmd->setName('Désactiver wifi 5G');
-                            $cmd->setEqLogic_id($this->getId());
-                            $cmd->setType('action');
-                            $cmd->setSubType('other');
-                            $cmd->setLogicalId('wifi5off');
-                            $cmd->save();
-                        }
-                        $cmd = $this->getCmd(null, 'wifioff');
-                        if ( is_object($cmd)) {
-                            $cmd->remove();
-                        }
+						$cmd = $this->getCmd(null, 'wifi2.4status');
+						if ( is_object($cmd)) {
+							$cmd->remove();
+						}
+					} elseif ( count($content["status"]) == 2 ) {
+						log::add('livebox','debug','Mode Wifi 2.4 et 5');
+						$cmd = $this->getCmd(null, 'wifi2.4on');
+						if ( ! is_object($cmd) ) {
+							$cmd = new liveboxCmd();
+							$cmd->setName('Activer wifi 2.4G');
+							$cmd->setEqLogic_id($this->getId());
+							$cmd->setType('action');
+							$cmd->setSubType('other');
+							$cmd->setLogicalId('wifi2.4on');
+							$cmd->save();
+						}
+						$cmd = $this->getCmd(null, 'wifi5on');
+						if ( ! is_object($cmd) ) {
+							$cmd = new liveboxCmd();
+							$cmd->setName('Activer wifi 5G');
+							$cmd->setEqLogic_id($this->getId());
+							$cmd->setType('action');
+							$cmd->setSubType('other');
+							$cmd->setLogicalId('wifi5on');
+							$cmd->save();
+						}
+						$cmd = $this->getCmd(null, 'wifi2.4off');
+						if ( ! is_object($cmd) ) {
+							$cmd = new liveboxCmd();
+							$cmd->setName('Désactiver wifi 2.4G');
+							$cmd->setEqLogic_id($this->getId());
+							$cmd->setType('action');
+							$cmd->setSubType('other');
+							$cmd->setLogicalId('wifi2.4off');
+							$cmd->save();
+						}
+						$cmd = $this->getCmd(null, 'wifi5off');
+						if ( ! is_object($cmd) ) {
+							$cmd = new liveboxCmd();
+							$cmd->setName('Désactiver wifi 5G');
+							$cmd->setEqLogic_id($this->getId());
+							$cmd->setType('action');
+							$cmd->setSubType('other');
+							$cmd->setLogicalId('wifi5off');
+							$cmd->save();
+						}
+						$cmd = $this->getCmd(null, 'wifioff');
+						if ( is_object($cmd)) {
+							$cmd->remove();
+						}
 
-                        $cmd = $this->getCmd(null, 'wifion');
-                        if ( is_object($cmd)) {
-                            $cmd->remove();
-                        }
-                        $cmd = $this->getCmd(null, 'wifi5status');
-                        if ( ! is_object($cmd)) {
-                            $cmd = new liveboxCmd();
-                            $cmd->setName('Etat Wifi 5G');
-                            $cmd->setEqLogic_id($this->getId());
-                            $cmd->setLogicalId('wifi5status');
-                            $cmd->setUnite('');
-                            $cmd->setType('info');
-                            $cmd->setSubType('binary');
-                            $cmd->setIsHistorized(0);
-                            $cmd->save();
-                        }
+						$cmd = $this->getCmd(null, 'wifion');
+						if ( is_object($cmd)) {
+							$cmd->remove();
+						}
+						$cmd = $this->getCmd(null, 'wifi5status');
+						if ( ! is_object($cmd)) {
+							$cmd = new liveboxCmd();
+							$cmd->setName('Etat Wifi 5G');
+							$cmd->setEqLogic_id($this->getId());
+							$cmd->setLogicalId('wifi5status');
+							$cmd->setUnite('');
+							$cmd->setType('info');
+							$cmd->setSubType('binary');
+							$cmd->setIsHistorized(0);
+							$cmd->save();
+						}
 
-                        $cmd = $this->getCmd(null, 'wifi2.4status');
-                        if ( ! is_object($cmd)) {
-                            $cmd = new liveboxCmd();
-                            $cmd->setName('Etat Wifi 2.4G');
-                            $cmd->setEqLogic_id($this->getId());
-                            $cmd->setLogicalId('wifi2.4status');
-                            $cmd->setUnite('');
-                            $cmd->setType('info');
-                            $cmd->setSubType('binary');
-                            $cmd->setIsHistorized(0);
-                            $cmd->save();
-                        }
-                        $cmd = $this->getCmd(null, 'wifistatus');
-                        if ( is_object($cmd)) {
-                            $cmd->remove();
-                        }
-                    }
-                    $content2 = $this->getPage("deviceinfo");
-                    if ( $content2 !== false ) {
-                        if ($content2['status']['ProductClass'] == 'Livebox 4' || $content2['status']['ProductClass'] == 'Livebox Fibre') {
-                            $cmd = $this->getCmd(null, 'guestwifion');
-                            if ( ! is_object($cmd) ) {
-                                $cmd = new liveboxCmd();
-                                $cmd->setName('Activer wifi invité');
-                                $cmd->setEqLogic_id($this->getId());
-                                $cmd->setType('action');
-                                $cmd->setSubType('other');
-                                $cmd->setLogicalId('guestwifion');
-                                $cmd->save();
-                            }
-                            $cmd = $this->getCmd(null, 'guestwifioff');
-                            if ( ! is_object($cmd) ) {
-                                $cmd = new liveboxCmd();
-                                $cmd->setName('Désactiver wifi invité');
-                                $cmd->setEqLogic_id($this->getId());
-                                $cmd->setType('action');
-                                $cmd->setSubType('other');
-                                $cmd->setLogicalId('guestwifioff');
-                                $cmd->save();
-                            }
-                            $cmd = $this->getCmd(null, 'guestwifistatus');
-                            if ( ! is_object($cmd)) {
-                                $cmd = new liveboxCmd();
-                                $cmd->setName('Etat Wifi Invité');
-                                $cmd->setEqLogic_id($this->getId());
-                                $cmd->setLogicalId('guestwifistatus');
-                                $cmd->setUnite('');
-                                $cmd->setType('info');
-                                $cmd->setSubType('binary');
-                                $cmd->setIsHistorized(0);
-                                $cmd->save();
-                            }
-                        } else {
-                            $cmd = $this->getCmd(null, 'guestwifion');
-                            if ( is_object($cmd) ) {
-                                $cmd->remove();
-                            }
-                            $cmd = $this->getCmd(null, 'guestwifioff');
-                            if ( is_object($cmd) ) {
-                                $cmd->remove();
-                            }
-                            $cmd = $this->getCmd(null, 'guestwifistatus');
-                            if ( is_object($cmd) ) {
-                                $cmd->remove();
-                            }
-                        }
-                    }
-                }
+						$cmd = $this->getCmd(null, 'wifi2.4status');
+						if ( ! is_object($cmd)) {
+							$cmd = new liveboxCmd();
+							$cmd->setName('Etat Wifi 2.4G');
+							$cmd->setEqLogic_id($this->getId());
+							$cmd->setLogicalId('wifi2.4status');
+							$cmd->setUnite('');
+							$cmd->setType('info');
+							$cmd->setSubType('binary');
+							$cmd->setIsHistorized(0);
+							$cmd->save();
+						}
+						$cmd = $this->getCmd(null, 'wifistatus');
+						if ( is_object($cmd)) {
+							$cmd->remove();
+						}
+					}
+					$content2 = $this->getPage("deviceinfo");
+					if ( $content2 !== false ) {
+						if ($content2['status']['ProductClass'] == 'Livebox 4' || $content2['status']['ProductClass'] == 'Livebox Fibre') {
+							$cmd = $this->getCmd(null, 'guestwifion');
+							if ( ! is_object($cmd) ) {
+								$cmd = new liveboxCmd();
+								$cmd->setName('Activer wifi invité');
+								$cmd->setEqLogic_id($this->getId());
+								$cmd->setType('action');
+								$cmd->setSubType('other');
+								$cmd->setLogicalId('guestwifion');
+								$cmd->save();
+							}
+							$cmd = $this->getCmd(null, 'guestwifioff');
+							if ( ! is_object($cmd) ) {
+								$cmd = new liveboxCmd();
+								$cmd->setName('Désactiver wifi invité');
+								$cmd->setEqLogic_id($this->getId());
+								$cmd->setType('action');
+								$cmd->setSubType('other');
+								$cmd->setLogicalId('guestwifioff');
+								$cmd->save();
+							}
+							$cmd = $this->getCmd(null, 'guestwifistatus');
+							if ( ! is_object($cmd)) {
+								$cmd = new liveboxCmd();
+								$cmd->setName('Etat Wifi Invité');
+								$cmd->setEqLogic_id($this->getId());
+								$cmd->setLogicalId('guestwifistatus');
+								$cmd->setUnite('');
+								$cmd->setType('info');
+								$cmd->setSubType('binary');
+								$cmd->setIsHistorized(0);
+								$cmd->save();
+							}
+						} else {
+							$cmd = $this->getCmd(null, 'guestwifion');
+							if ( is_object($cmd) ) {
+								$cmd->remove();
+							}
+							$cmd = $this->getCmd(null, 'guestwifioff');
+							if ( is_object($cmd) ) {
+								$cmd->remove();
+							}
+							$cmd = $this->getCmd(null, 'guestwifistatus');
+							if ( is_object($cmd) ) {
+								$cmd->remove();
+							}
+						}
+					}
+				}
 
 
-                $cmd = $this->getCmd(null, 'numerotelephone');
-                if ( is_object($cmd)) {
-                    $cmd->remove();
-                }
-                $content = $this->getPage("voip");
-                if ( $content !== false ) {
-                    log::add('livebox','debug','Mode VOIP');
-                    if ( isset($content["status"]) ) {
-                        log::add('livebox','debug','Mode VOIP actif');
-                        foreach ( $content["status"] as $voip ) {
-                            if ( ! isset($voip["signalingProtocol"]) ) {
-                                $voip["signalingProtocol"] = strstr($voip["name"], "-", true);
-                            }
-                            if ( strtolower($voip["trunk_lines"]["0"]["enable"]) == "enabled" ) {
-                                log::add('livebox','debug','Mode VOIP '.$voip["signalingProtocol"].' actif');
-                                $cmd = $this->getCmd(null, 'voipstatus'.$voip["signalingProtocol"]);
-                                if ( ! is_object($cmd)) {
-                                    $cmd = new liveboxCmd();
-                                    $cmd->setName('Etat VoIP '.$voip["signalingProtocol"]);
-                                    $cmd->setEqLogic_id($this->getId());
-                                    $cmd->setLogicalId('voipstatus'.$voip["signalingProtocol"]);
-                                    $cmd->setUnite('');
-                                    $cmd->setType('info');
-                                    $cmd->setSubType('binary');
-                                    $cmd->setIsHistorized(0);
-                                    $cmd->setIsVisible(1);
-                                    $cmd->save();
-                                }
-                                $cmd = $this->getCmd(null, 'numerotelephone'.$voip["signalingProtocol"]);
-                                if ( ! is_object($cmd)) {
-                                    $cmd = new liveboxCmd();
-                                    $cmd->setName('Numero de telephone '.$voip["signalingProtocol"]);
-                                    $cmd->setEqLogic_id($this->getId());
-                                    $cmd->setLogicalId('numerotelephone'.$voip["signalingProtocol"]);
-                                    $cmd->setUnite('');
-                                    $cmd->setType('info');
-                                    $cmd->setSubType('string');
-                                    $cmd->setIsHistorized(0);
-                                    $cmd->setIsVisible(1);
-                                    $cmd->save();
-                                }
-                            } else {
-                                log::add('livebox','debug','Mode VOIP '.$voip["signalingProtocol"].' inactif');
-                                $cmd = $this->getCmd(null, 'voipstatus'.$voip["signalingProtocol"]);
-                                if ( is_object($cmd)) {
-                                    $cmd->remove();
-                                }
-                                $cmd = $this->getCmd(null, 'numerotelephone'.$voip["signalingProtocol"]);
-                                if ( is_object($cmd)) {
-                                    $cmd->remove();
-                                }
-                            }
-                        }
-                    } else {
-                        log::add('livebox','debug','Mode VOIP inactif');
-                    }
-                    $cmd = $this->getCmd(null, 'missedcallsnumber');
-                    if ( ! is_object($cmd)) {
-                        $cmd = new liveboxCmd();
-                        $cmd->setName("Nombre des appels manqués");
-                        $cmd->setEqLogic_id($this->getId());
-                        $cmd->setLogicalId('missedcallsnumber');
-                        $cmd->setUnite('');
-                        $cmd->setType('info');
-                        $cmd->setSubType('numeric');
-                        $cmd->setIsHistorized(0);
-                        $cmd->setTemplate('dashboard', 'line');
-                        $cmd->save();
-                    }
-                    $cmd = $this->getCmd(null, 'incallsnumber');
-                    if ( ! is_object($cmd)) {
-                        $cmd = new liveboxCmd();
-                        $cmd->setName("Nombre des appels entrants");
-                        $cmd->setEqLogic_id($this->getId());
-                        $cmd->setLogicalId('incallsnumber');
-                        $cmd->setUnite('');
-                        $cmd->setType('info');
-                        $cmd->setSubType('numeric');
-                        $cmd->setIsHistorized(0);
-                        $cmd->setTemplate('dashboard', 'line');
-                        $cmd->save();
-                    }
-                    $cmd = $this->getCmd(null, 'outcallsnumber');
-                    if ( ! is_object($cmd)) {
-                        $cmd = new liveboxCmd();
-                        $cmd->setName("Nombre des appels sortants");
-                        $cmd->setEqLogic_id($this->getId());
-                        $cmd->setLogicalId('outcallsnumber');
-                        $cmd->setUnite('');
-                        $cmd->setType('info');
-                        $cmd->setSubType('numeric');
-                        $cmd->setIsHistorized(0);
-                        $cmd->setTemplate('dashboard', 'line');
-                        $cmd->save();
-                    }
-                    $cmd = $this->getCmd(null, 'totalcallsnumber');
-                    if ( ! is_object($cmd)) {
-                        $cmd = new liveboxCmd();
-                        $cmd->setName("Nombre total des appels");
-                        $cmd->setEqLogic_id($this->getId());
-                        $cmd->setLogicalId('totalcallsnumber');
-                        $cmd->setUnite('');
-                        $cmd->setType('info');
-                        $cmd->setSubType('numeric');
-                        $cmd->setIsHistorized(0);
-                        $cmd->setIsVisible(0);
-                        $cmd->setTemplate('dashboard', 'line');
-                        $cmd->save();
-                    }
-                    $cmd = $this->getCmd(null, 'outcallstable');
-                    if ( ! is_object($cmd)) {
-                        $cmd = new liveboxCmd();
-                        $cmd->setName('Liste des appels sortants');
-                        $cmd->setEqLogic_id($this->getId());
-                        $cmd->setLogicalId('outcallstable');
-                        $cmd->setUnite('');
-                        $cmd->setType('info');
-                        $cmd->setSubType('string');
-                        $cmd->setIsVisible(0);
-                        $cmd->setIsHistorized(0);
-                        if ( version_compare(jeedom::version(), "4", "<")) {
-                            $cmd->setTemplate('dashboard', 'deroulantv3');
-                            $cmd->setTemplate('mobile', 'deroulantv3');
-                        } else {
-                            $cmd->setTemplate('dashboard', 'livebox::deroulant');
-                            $cmd->setTemplate('mobile', 'livebox::deroulant');
-                        }
-                        $cmd->save();
-                    }
-                    $cmd = $this->getCmd(null, 'incallstable');
-                    if ( ! is_object($cmd)) {
-                        $cmd = new liveboxCmd();
-                        $cmd->setName('Liste des appels entrants');
-                        $cmd->setEqLogic_id($this->getId());
-                        $cmd->setLogicalId('incallstable');
-                        $cmd->setUnite('');
-                        $cmd->setType('info');
-                        $cmd->setSubType('string');
-                        $cmd->setIsVisible(0);
-                        $cmd->setIsHistorized(0);
-                        if ( version_compare(jeedom::version(), "4", "<")) {
-                            $cmd->setTemplate('dashboard', 'deroulantv3');
-                            $cmd->setTemplate('mobile', 'deroulantv3');
-                        } else {
-                            $cmd->setTemplate('dashboard', 'livebox::deroulant');
-                            $cmd->setTemplate('mobile', 'livebox::deroulant');
-                        }
-                        $cmd->save();
-                    }
-                    $cmd = $this->getCmd(null, 'missedcallstable');
-                    if ( ! is_object($cmd)) {
-                        $cmd = new liveboxCmd();
-                        $cmd->setName('Liste des appels manqués');
-                        $cmd->setEqLogic_id($this->getId());
-                        $cmd->setLogicalId('missedcallstable');
-                        $cmd->setUnite('');
-                        $cmd->setType('info');
-                        $cmd->setSubType('string');
-                        $cmd->setIsVisible(0);
-                        $cmd->setIsHistorized(0);
-                        if ( version_compare(jeedom::version(), "4", "<")) {
-                            $cmd->setTemplate('dashboard', 'deroulantv3');
-                            $cmd->setTemplate('mobile', 'deroulantv3');
-                        } else {
-                            $cmd->setTemplate('dashboard', 'livebox::deroulant');
-                            $cmd->setTemplate('mobile', 'livebox::deroulant');
-                        }
-                        $cmd->save();
-                    }
-                    $cmd = $this->getCmd(null, 'callstable');
-                    if ( ! is_object($cmd)) {
-                        $cmd = new liveboxCmd();
-                        $cmd->setName('Liste des appels');
-                        $cmd->setEqLogic_id($this->getId());
-                        $cmd->setLogicalId('callstable');
-                        $cmd->setUnite('');
-                        $cmd->setType('info');
-                        $cmd->setSubType('string');
-                        $cmd->setIsHistorized(0);
-                        if ( version_compare(jeedom::version(), "4", "<")) {
-                            $cmd->setTemplate('dashboard', 'deroulantv3');
-                            $cmd->setTemplate('mobile', 'deroulantv3');
-                        } else {
-                            $cmd->setTemplate('dashboard', 'livebox::deroulant');
-                            $cmd->setTemplate('mobile', 'livebox::deroulant');
-                        }
-                        $cmd->save();
-                    }
-                }
+				$cmd = $this->getCmd(null, 'numerotelephone');
+				if ( is_object($cmd)) {
+					$cmd->remove();
+				}
+				$content = $this->getPage("voip");
+				if ( $content !== false ) {
+					log::add('livebox','debug','Mode VOIP');
+					if ( isset($content["status"]) ) {
+						log::add('livebox','debug','Mode VOIP actif');
+						foreach ( $content["status"] as $voip ) {
+							if ( ! isset($voip["signalingProtocol"]) ) {
+								$voip["signalingProtocol"] = strstr($voip["name"], "-", true);
+							}
+							if ( strtolower($voip["trunk_lines"]["0"]["enable"]) == "enabled" ) {
+								log::add('livebox','debug','Mode VOIP '.$voip["signalingProtocol"].' actif');
+								$cmd = $this->getCmd(null, 'voipstatus'.$voip["signalingProtocol"]);
+								if ( ! is_object($cmd)) {
+									$cmd = new liveboxCmd();
+									$cmd->setName('Etat VoIP '.$voip["signalingProtocol"]);
+									$cmd->setEqLogic_id($this->getId());
+									$cmd->setLogicalId('voipstatus'.$voip["signalingProtocol"]);
+									$cmd->setUnite('');
+									$cmd->setType('info');
+									$cmd->setSubType('binary');
+									$cmd->setIsHistorized(0);
+									$cmd->setIsVisible(1);
+									$cmd->save();
+								}
+								$cmd = $this->getCmd(null, 'numerotelephone'.$voip["signalingProtocol"]);
+								if ( ! is_object($cmd)) {
+									$cmd = new liveboxCmd();
+									$cmd->setName('Numero de telephone '.$voip["signalingProtocol"]);
+									$cmd->setEqLogic_id($this->getId());
+									$cmd->setLogicalId('numerotelephone'.$voip["signalingProtocol"]);
+									$cmd->setUnite('');
+									$cmd->setType('info');
+									$cmd->setSubType('string');
+									$cmd->setIsHistorized(0);
+									$cmd->setIsVisible(1);
+									$cmd->save();
+								}
+							} else {
+								log::add('livebox','debug','Mode VOIP '.$voip["signalingProtocol"].' inactif');
+								$cmd = $this->getCmd(null, 'voipstatus'.$voip["signalingProtocol"]);
+								if ( is_object($cmd)) {
+									$cmd->remove();
+								}
+								$cmd = $this->getCmd(null, 'numerotelephone'.$voip["signalingProtocol"]);
+								if ( is_object($cmd)) {
+									$cmd->remove();
+								}
+							}
+						}
+					} else {
+						log::add('livebox','debug','Mode VOIP inactif');
+					}
+					$cmd = $this->getCmd(null, 'missedcallsnumber');
+					if ( ! is_object($cmd)) {
+						$cmd = new liveboxCmd();
+						$cmd->setName("Nombre des appels manqués");
+						$cmd->setEqLogic_id($this->getId());
+						$cmd->setLogicalId('missedcallsnumber');
+						$cmd->setUnite('');
+						$cmd->setType('info');
+						$cmd->setSubType('numeric');
+						$cmd->setIsHistorized(0);
+						$cmd->setTemplate('dashboard', 'line');
+						$cmd->save();
+					}
+					$cmd = $this->getCmd(null, 'incallsnumber');
+					if ( ! is_object($cmd)) {
+						$cmd = new liveboxCmd();
+						$cmd->setName("Nombre des appels entrants");
+						$cmd->setEqLogic_id($this->getId());
+						$cmd->setLogicalId('incallsnumber');
+						$cmd->setUnite('');
+						$cmd->setType('info');
+						$cmd->setSubType('numeric');
+						$cmd->setIsHistorized(0);
+						$cmd->setTemplate('dashboard', 'line');
+						$cmd->save();
+					}
+					$cmd = $this->getCmd(null, 'outcallsnumber');
+					if ( ! is_object($cmd)) {
+						$cmd = new liveboxCmd();
+						$cmd->setName("Nombre des appels sortants");
+						$cmd->setEqLogic_id($this->getId());
+						$cmd->setLogicalId('outcallsnumber');
+						$cmd->setUnite('');
+						$cmd->setType('info');
+						$cmd->setSubType('numeric');
+						$cmd->setIsHistorized(0);
+						$cmd->setTemplate('dashboard', 'line');
+						$cmd->save();
+					}
+					$cmd = $this->getCmd(null, 'totalcallsnumber');
+					if ( ! is_object($cmd)) {
+						$cmd = new liveboxCmd();
+						$cmd->setName("Nombre total des appels");
+						$cmd->setEqLogic_id($this->getId());
+						$cmd->setLogicalId('totalcallsnumber');
+						$cmd->setUnite('');
+						$cmd->setType('info');
+						$cmd->setSubType('numeric');
+						$cmd->setIsHistorized(0);
+						$cmd->setIsVisible(0);
+						$cmd->setTemplate('dashboard', 'line');
+						$cmd->save();
+					}
+					$cmd = $this->getCmd(null, 'outcallstable');
+					if ( ! is_object($cmd)) {
+						$cmd = new liveboxCmd();
+						$cmd->setName('Liste des appels sortants');
+						$cmd->setEqLogic_id($this->getId());
+						$cmd->setLogicalId('outcallstable');
+						$cmd->setUnite('');
+						$cmd->setType('info');
+						$cmd->setSubType('string');
+						$cmd->setIsVisible(0);
+						$cmd->setIsHistorized(0);
+						if ( version_compare(jeedom::version(), "4", "<")) {
+							$cmd->setTemplate('dashboard', 'deroulantv3');
+							$cmd->setTemplate('mobile', 'deroulantv3');
+						} else {
+							$cmd->setTemplate('dashboard', 'livebox::deroulant');
+							$cmd->setTemplate('mobile', 'livebox::deroulant');
+						}
+						$cmd->save();
+					}
+					$cmd = $this->getCmd(null, 'incallstable');
+					if ( ! is_object($cmd)) {
+						$cmd = new liveboxCmd();
+						$cmd->setName('Liste des appels entrants');
+						$cmd->setEqLogic_id($this->getId());
+						$cmd->setLogicalId('incallstable');
+						$cmd->setUnite('');
+						$cmd->setType('info');
+						$cmd->setSubType('string');
+						$cmd->setIsVisible(0);
+						$cmd->setIsHistorized(0);
+						if ( version_compare(jeedom::version(), "4", "<")) {
+							$cmd->setTemplate('dashboard', 'deroulantv3');
+							$cmd->setTemplate('mobile', 'deroulantv3');
+						} else {
+							$cmd->setTemplate('dashboard', 'livebox::deroulant');
+							$cmd->setTemplate('mobile', 'livebox::deroulant');
+						}
+						$cmd->save();
+					}
+					$cmd = $this->getCmd(null, 'missedcallstable');
+					if ( ! is_object($cmd)) {
+						$cmd = new liveboxCmd();
+						$cmd->setName('Liste des appels manqués');
+						$cmd->setEqLogic_id($this->getId());
+						$cmd->setLogicalId('missedcallstable');
+						$cmd->setUnite('');
+						$cmd->setType('info');
+						$cmd->setSubType('string');
+						$cmd->setIsVisible(0);
+						$cmd->setIsHistorized(0);
+						if ( version_compare(jeedom::version(), "4", "<")) {
+							$cmd->setTemplate('dashboard', 'deroulantv3');
+							$cmd->setTemplate('mobile', 'deroulantv3');
+						} else {
+							$cmd->setTemplate('dashboard', 'livebox::deroulant');
+							$cmd->setTemplate('mobile', 'livebox::deroulant');
+						}
+						$cmd->save();
+					}
+					$cmd = $this->getCmd(null, 'callstable');
+					if ( ! is_object($cmd)) {
+						$cmd = new liveboxCmd();
+						$cmd->setName('Liste des appels');
+						$cmd->setEqLogic_id($this->getId());
+						$cmd->setLogicalId('callstable');
+						$cmd->setUnite('');
+						$cmd->setType('info');
+						$cmd->setSubType('string');
+						$cmd->setIsHistorized(0);
+						if ( version_compare(jeedom::version(), "4", "<")) {
+							$cmd->setTemplate('dashboard', 'deroulantv3');
+							$cmd->setTemplate('mobile', 'deroulantv3');
+						} else {
+							$cmd->setTemplate('dashboard', 'livebox::deroulant');
+							$cmd->setTemplate('mobile', 'livebox::deroulant');
+						}
+						$cmd->save();
+					}
+				}
 
-                $cmd = $this->getCmd(null, 'updatetime');
-                if ( ! is_object($cmd)) {
-                    $cmd = new liveboxCmd();
-                    $cmd->setName('Dernier refresh');
-                    $cmd->setEqLogic_id($this->getId());
-                    $cmd->setLogicalId('updatetime');
-                    $cmd->setUnite('');
-                    $cmd->setType('info');
-                    $cmd->setSubType('string');
-                    $cmd->setIsHistorized(0);
-                    $cmd->save();
-                }
-                $cmd = $this->getCmd(null, 'reboot');
-                if ( ! is_object($cmd) ) {
-                    $cmd = new liveboxCmd();
-                    $cmd->setName('Reboot');
-                    $cmd->setEqLogic_id($this->getId());
-                    $cmd->setType('action');
-                    $cmd->setSubType('other');
-                    $cmd->setLogicalId('reboot');
-                    $cmd->save();
-                }
-                $cmd = $this->getCmd(null, 'ring');
-                if ( ! is_object($cmd) ) {
-                    $cmd = new liveboxCmd();
-                    $cmd->setName('Sonner');
-                    $cmd->setEqLogic_id($this->getId());
-                    $cmd->setType('action');
-                    $cmd->setSubType('other');
-                    $cmd->setLogicalId('ring');
-                    $cmd->save();
-                }
+				$cmd = $this->getCmd(null, 'updatetime');
+				if ( ! is_object($cmd)) {
+					$cmd = new liveboxCmd();
+					$cmd->setName('Dernier refresh');
+					$cmd->setEqLogic_id($this->getId());
+					$cmd->setLogicalId('updatetime');
+					$cmd->setUnite('');
+					$cmd->setType('info');
+					$cmd->setSubType('string');
+					$cmd->setIsHistorized(0);
+					$cmd->save();
+				}
+				$cmd = $this->getCmd(null, 'reboot');
+				if ( ! is_object($cmd) ) {
+					$cmd = new liveboxCmd();
+					$cmd->setName('Reboot');
+					$cmd->setEqLogic_id($this->getId());
+					$cmd->setType('action');
+					$cmd->setSubType('other');
+					$cmd->setLogicalId('reboot');
+					$cmd->save();
+				}
+				$cmd = $this->getCmd(null, 'ring');
+				if ( ! is_object($cmd) ) {
+					$cmd = new liveboxCmd();
+					$cmd->setName('Sonner');
+					$cmd->setEqLogic_id($this->getId());
+					$cmd->setType('action');
+					$cmd->setSubType('other');
+					$cmd->setLogicalId('ring');
+					$cmd->save();
+				}
 
-                $cmd = $this->getCmd(null, 'wpspushbutton');
-                if ( ! is_object($cmd) ) {
-                    $cmd = new liveboxCmd();
-                    $cmd->setName('WPS Push Button');
-                    $cmd->setEqLogic_id($this->getId());
-                    $cmd->setType('action');
-                    $cmd->setSubType('other');
-                    $cmd->setLogicalId('wpspushbutton');
-                    $cmd->save();
-                }
+				$cmd = $this->getCmd(null, 'wpspushbutton');
+				if ( ! is_object($cmd) ) {
+					$cmd = new liveboxCmd();
+					$cmd->setName('WPS Push Button');
+					$cmd->setEqLogic_id($this->getId());
+					$cmd->setType('action');
+					$cmd->setSubType('other');
+					$cmd->setLogicalId('wpspushbutton');
+					$cmd->save();
+				}
 
-                $cmd = $this->getCmd(null, 'state');
-                if ( ! is_object($cmd)) {
-                    $cmd = new liveboxCmd();
-                    $cmd->setName('Etat');
-                    $cmd->setEqLogic_id($this->getId());
-                    $cmd->setLogicalId('state');
-                    $cmd->setUnite('');
-                    $cmd->setType('info');
-                    $cmd->setSubType('binary');
-                    $cmd->setIsHistorized(0);
-                    $cmd->save();
-                }
-                $cmd = $this->getCmd(null, 'uptime');
-                if ( ! is_object($cmd)) {
-                    $cmd = new liveboxCmd();
-                    $cmd->setName('Durée de fonctionnement');
-                    $cmd->setEqLogic_id($this->getId());
-                    $cmd->setLogicalId('uptime');
-                    $cmd->setUnite('s');
-                    $cmd->setType('info');
-                    $cmd->setSubType('numeric');
-                    if ( version_compare(jeedom::version(), "4", "<")) {
-                        $cmd->setTemplate('dashboard', 'dureev3');
-                        $cmd->setTemplate('mobile', 'dureev3');
-                    } else {
-                        $cmd->setTemplate('dashboard', 'livebox::duree');
-                        $cmd->setTemplate('mobile', 'livebox::duree');
-                    }
-                    $cmd->setIsHistorized(0);
-                    $cmd->save();
-                }
-                $cmd = $this->getCmd(null, 'linkstate');
-                if ( ! is_object($cmd)) {
-                    $cmd = new liveboxCmd();
-                    $cmd->setName('Etat synchro');
-                    $cmd->setEqLogic_id($this->getId());
-                    $cmd->setLogicalId('linkstate');
-                    $cmd->setUnite('');
-                    $cmd->setType('info');
-                    $cmd->setSubType('binary');
-                    $cmd->setIsHistorized(0);
-                    $cmd->save();
-                }
+				$cmd = $this->getCmd(null, 'state');
+				if ( ! is_object($cmd)) {
+					$cmd = new liveboxCmd();
+					$cmd->setName('Etat');
+					$cmd->setEqLogic_id($this->getId());
+					$cmd->setLogicalId('state');
+					$cmd->setUnite('');
+					$cmd->setType('info');
+					$cmd->setSubType('binary');
+					$cmd->setIsHistorized(0);
+					$cmd->save();
+				}
+				$cmd = $this->getCmd(null, 'uptime');
+				if ( ! is_object($cmd)) {
+					$cmd = new liveboxCmd();
+					$cmd->setName('Durée de fonctionnement');
+					$cmd->setEqLogic_id($this->getId());
+					$cmd->setLogicalId('uptime');
+					$cmd->setUnite('s');
+					$cmd->setType('info');
+					$cmd->setSubType('numeric');
+					if ( version_compare(jeedom::version(), "4", "<")) {
+						$cmd->setTemplate('dashboard', 'dureev3');
+						$cmd->setTemplate('mobile', 'dureev3');
+					} else {
+						$cmd->setTemplate('dashboard', 'livebox::duree');
+						$cmd->setTemplate('mobile', 'livebox::duree');
+					}
+					$cmd->setIsHistorized(0);
+					$cmd->save();
+				}
+				$cmd = $this->getCmd(null, 'linkstate');
+				if ( ! is_object($cmd)) {
+					$cmd = new liveboxCmd();
+					$cmd->setName('Etat synchro');
+					$cmd->setEqLogic_id($this->getId());
+					$cmd->setLogicalId('linkstate');
+					$cmd->setUnite('');
+					$cmd->setType('info');
+					$cmd->setSubType('binary');
+					$cmd->setIsHistorized(0);
+					$cmd->save();
+				}
 
-                $cmd = $this->getCmd(null, 'connectionstate');
-                if ( ! is_object($cmd)) {
-                    $cmd = new liveboxCmd();
-                    $cmd->setName('Etat connexion');
-                    $cmd->setEqLogic_id($this->getId());
-                    $cmd->setLogicalId('connectionstate');
-                    $cmd->setUnite('');
-                    $cmd->setType('info');
-                    $cmd->setSubType('binary');
-                    $cmd->setIsHistorized(0);
-                    $cmd->save();
-                }
+				$cmd = $this->getCmd(null, 'connectionstate');
+				if ( ! is_object($cmd)) {
+					$cmd = new liveboxCmd();
+					$cmd->setName('Etat connexion');
+					$cmd->setEqLogic_id($this->getId());
+					$cmd->setLogicalId('connectionstate');
+					$cmd->setUnite('');
+					$cmd->setType('info');
+					$cmd->setSubType('binary');
+					$cmd->setIsHistorized(0);
+					$cmd->save();
+				}
 
-                $cmd = $this->getCmd(null, 'tvstatus');
-                if ( ! is_object($cmd)) {
-                    $cmd = new liveboxCmd();
-                    $cmd->setName('Etat TV');
-                    $cmd->setEqLogic_id($this->getId());
-                    $cmd->setLogicalId('tvstatus');
-                    $cmd->setUnite('');
-                    $cmd->setType('info');
-                    $cmd->setSubType('binary');
-                    $cmd->setIsHistorized(0);
-                    $cmd->save();
-                }
+				$cmd = $this->getCmd(null, 'tvstatus');
+				if ( ! is_object($cmd)) {
+					$cmd = new liveboxCmd();
+					$cmd->setName('Etat TV');
+					$cmd->setEqLogic_id($this->getId());
+					$cmd->setLogicalId('tvstatus');
+					$cmd->setUnite('');
+					$cmd->setType('info');
+					$cmd->setSubType('binary');
+					$cmd->setIsHistorized(0);
+					$cmd->save();
+				}
 
-                $cmd = $this->getCmd(null, 'ipwan');
-                if ( ! is_object($cmd)) {
-                    $cmd = new liveboxCmd();
-                    $cmd->setName('IP Wan');
-                    $cmd->setEqLogic_id($this->getId());
-                    $cmd->setLogicalId('ipwan');
-                    $cmd->setUnite('');
-                    $cmd->setType('info');
-                    $cmd->setSubType('string');
-                    $cmd->setIsHistorized(0);
-                    $cmd->save();
-                }
+				$cmd = $this->getCmd(null, 'ipwan');
+				if ( ! is_object($cmd)) {
+					$cmd = new liveboxCmd();
+					$cmd->setName('IP Wan');
+					$cmd->setEqLogic_id($this->getId());
+					$cmd->setLogicalId('ipwan');
+					$cmd->setUnite('');
+					$cmd->setType('info');
+					$cmd->setSubType('string');
+					$cmd->setIsHistorized(0);
+					$cmd->save();
+				}
 
-                $cmd = $this->getCmd(null, 'devicelist');
-                if ( ! is_object($cmd)) {
-                    $cmd = new liveboxCmd();
-                    $cmd->setName('Liste des équipements');
-                    $cmd->setEqLogic_id($this->getId());
-                    $cmd->setLogicalId('devicelist');
-                    $cmd->setUnite('');
-                    $cmd->setType('info');
-                    $cmd->setSubType('string');
-                    $cmd->setIsHistorized(0);
-                    $cmd->save();
-                }
+				$cmd = $this->getCmd(null, 'devicelist');
+				if ( ! is_object($cmd)) {
+					$cmd = new liveboxCmd();
+					$cmd->setName('Liste des équipements');
+					$cmd->setEqLogic_id($this->getId());
+					$cmd->setLogicalId('devicelist');
+					$cmd->setUnite('');
+					$cmd->setType('info');
+					$cmd->setSubType('string');
+					$cmd->setIsHistorized(0);
+					$cmd->save();
+				}
 
-                $cmd = $this->getCmd(null, 'ipv6wan');
-                if ( ! is_object($cmd)) {
-                    $cmd = new liveboxCmd();
-                    $cmd->setName('IPv6 Wan');
-                    $cmd->setEqLogic_id($this->getId());
-                    $cmd->setLogicalId('ipv6wan');
-                    $cmd->setUnite('');
-                    $cmd->setType('info');
-                    $cmd->setSubType('string');
-                    $cmd->setIsHistorized(0);
-                    $cmd->save();
-                }
-                $this->refreshInfo();
-                $this->logOut();
-            }
-        } else if ($this->getConfiguration('type','') == 'cli') {
-            $cmd = $this->getCmd(null, 'lastseen');
-            if ( ! is_object($cmd)) {
-                $cmd = new liveboxCmd();
-                $cmd->setName('Vu dernière fois');
-                $cmd->setEqLogic_id($this->getId());
-                $cmd->setLogicalId('lastseen');
-                $cmd->setType('info');
-                $cmd->setSubType('string');
-                $cmd->setIsVisible(1);
-                $cmd->setIsHistorized(0);
-                $cmd->save();
-            }
-            $cmd = $this->getCmd(null, 'firstseen');
-            if ( ! is_object($cmd)) {
-                $cmd = new liveboxCmd();
-                $cmd->setName('Vu première Fois');
-                $cmd->setEqLogic_id($this->getId());
-                $cmd->setLogicalId('firstseen');
-                $cmd->setType('info');
-                $cmd->setSubType('string');
-                $cmd->setIsVisible(1);
-                $cmd->setIsHistorized(0);
-                $cmd->save();
-            }
-            $cmd = $this->getCmd(null, 'present');
-            if ( ! is_object($cmd)) {
-                $cmd = new liveboxCmd();
-                $cmd->setName('Présent');
-                $cmd->setEqLogic_id($this->getId());
-                $cmd->setLogicalId('present');
-                $cmd->setType('info');
-                $cmd->setSubType('binary');
-                $cmd->setIsVisible(1);
-                $cmd->setIsHistorized(1);
-                $cmd->save();
-            }
-            $cmd = $this->getCmd(null, 'ip');
-            if ( ! is_object($cmd)) {
-                $cmd = new liveboxCmd();
-                $cmd->setName('Adresse IP');
-                $cmd->setEqLogic_id($this->getId());
-                $cmd->setLogicalId('ip');
-                $cmd->setType('info');
-                $cmd->setSubType('string');
-                $cmd->setIsVisible(1);
-                $cmd->setIsHistorized(0);
-                $cmd->save();
-            }
-            $cmd = $this->getCmd(null, 'blocked');
-            if ( ! is_object($cmd)) {
-                $cmd = new liveboxCmd();
-                $cmd->setName('Bloqué');
-                $cmd->setEqLogic_id($this->getId());
-                $cmd->setLogicalId('blocked');
-                $cmd->setType('info');
-                $cmd->setSubType('binary');
-                $cmd->setIsVisible(1);
-                $cmd->setIsHistorized(1);
-                $cmd->save();
-            }
-            $cmdId = $cmd->getId();
-            $cmd = $this->getCmd(null, 'blockcli');
-            if ( ! is_object($cmd)) {
-                $cmd = new liveboxCmd();
-                $cmd->setName('Bloquer');
-                $cmd->setEqLogic_id($this->getId());
-                $cmd->setLogicalId('blockcli');
-                $cmd->setType('action');
-                $cmd->setSubType('other');
-                $cmd->setValue($cmdId);
-                $cmd->setIsVisible(1);
-                $cmd->save();
-            }
-            $cmd = $this->getCmd(null, 'unblockcli');
-            if ( ! is_object($cmd)) {
-                $cmd = new liveboxCmd();
-                $cmd->setName('Débloquer');
-                $cmd->setEqLogic_id($this->getId());
-                $cmd->setLogicalId('unblockcli');
-                $cmd->setType('action');
-                $cmd->setSubType('other');
-                $cmd->setValue($cmdId);
-                $cmd->setIsVisible(1);
-                $cmd->save();
-            }
-        }
+				$cmd = $this->getCmd(null, 'ipv6wan');
+				if ( ! is_object($cmd)) {
+					$cmd = new liveboxCmd();
+					$cmd->setName('IPv6 Wan');
+					$cmd->setEqLogic_id($this->getId());
+					$cmd->setLogicalId('ipv6wan');
+					$cmd->setUnite('');
+					$cmd->setType('info');
+					$cmd->setSubType('string');
+					$cmd->setIsHistorized(0);
+					$cmd->save();
+				}
+				$this->refreshInfo();
+				$this->logOut();
+			}
+		} else if ($this->getConfiguration('type','') == 'cli') {
+			$cmd = $this->getCmd(null, 'lastseen');
+			if ( ! is_object($cmd)) {
+				$cmd = new liveboxCmd();
+				$cmd->setName('Vu dernière fois');
+				$cmd->setEqLogic_id($this->getId());
+				$cmd->setLogicalId('lastseen');
+				$cmd->setType('info');
+				$cmd->setSubType('string');
+				$cmd->setGeneric_type( 'GENERIC_INFO');
+				$cmd->setIsVisible(1);
+				$cmd->setIsHistorized(0);
+				$cmd->save();
+			}
+			$cmd = $this->getCmd(null, 'firstseen');
+			if ( ! is_object($cmd)) {
+				$cmd = new liveboxCmd();
+				$cmd->setName('Vu première Fois');
+				$cmd->setEqLogic_id($this->getId());
+				$cmd->setLogicalId('firstseen');
+				$cmd->setType('info');
+				$cmd->setSubType('string');
+				$cmd->setGeneric_type( 'GENERIC_INFO');
+				$cmd->setIsVisible(1);
+				$cmd->setIsHistorized(0);
+				$cmd->save();
+			}
+			$cmd = $this->getCmd(null, 'present');
+			if ( ! is_object($cmd)) {
+				$cmd = new liveboxCmd();
+				$cmd->setName('Présent');
+				$cmd->setEqLogic_id($this->getId());
+				$cmd->setLogicalId('present');
+				$cmd->setType('info');
+				$cmd->setGeneric_type( 'GENERIC_INFO');
+				$cmd->setSubType('binary');
+				$cmd->setIsVisible(1);
+				$cmd->setIsHistorized(1);
+				$cmd->save();
+			}
+			$cmd = $this->getCmd(null, 'ip');
+			if ( ! is_object($cmd)) {
+				$cmd = new liveboxCmd();
+				$cmd->setName('Adresse IP');
+				$cmd->setEqLogic_id($this->getId());
+				$cmd->setLogicalId('ip');
+				$cmd->setType('info');
+				$cmd->setSubType('string');
+				$cmd->setGeneric_type( 'GENERIC_INFO');
+				$cmd->setIsVisible(1);
+				$cmd->setIsHistorized(0);
+				$cmd->save();
+			}
+			$cmd = $this->getCmd(null, 'blocked');
+			if ( ! is_object($cmd)) {
+				$cmd = new liveboxCmd();
+				$cmd->setName('Bloqué');
+				$cmd->setEqLogic_id($this->getId());
+				$cmd->setLogicalId('blocked');
+				$cmd->setType('info');
+				$cmd->setSubType('binary');
+				$cmd->setGeneric_type( 'SWITCH_STATE');
+				$cmd->setIsVisible(1);
+				$cmd->setIsHistorized(1);
+				$cmd->save();
+			}
+			$cmdId = $cmd->getId();
+			$cmd = $this->getCmd(null, 'blockcli');
+			if ( ! is_object($cmd)) {
+				$cmd = new liveboxCmd();
+				$cmd->setName('Bloquer');
+				$cmd->setEqLogic_id($this->getId());
+				$cmd->setLogicalId('blockcli');
+				$cmd->setType('action');
+				$cmd->setSubType('other');
+				$cmd->setGeneric_type( 'SWITCH_ON');
+				$cmd->setValue($cmdId);
+				$cmd->setIsVisible(1);
+				$cmd->save();
+			}
+			$cmd = $this->getCmd(null, 'unblockcli');
+			if ( ! is_object($cmd)) {
+				$cmd = new liveboxCmd();
+				$cmd->setName('Débloquer');
+				$cmd->setEqLogic_id($this->getId());
+				$cmd->setLogicalId('unblockcli');
+				$cmd->setType('action');
+				$cmd->setSubType('other');
+				 $cmd->setGeneric_type( 'SWITCH_OFF');
+				$cmd->setValue($cmdId);
+				$cmd->setIsVisible(1);
+				$cmd->save();
+			}
+		}
 	}
 
 	public function getImage() {
 		if($this->getConfiguration('type') == 'cli'){
-			return 'plugins/livebox/core/config/cli/wired/icon.png';
+			$filename = 'plugins/livebox/core/config/cli/' . $this->getConfiguration('deviceType') .'.png';
+			if(file_exists(__DIR__.'/../../../../'.$filename)){
+				return $filename;
+			}
+			return 'plugins/livebox/core/config/cli/wired.png';
 		}
 		return 'plugins/livebox/plugin_info/livebox_icon.png';
 	}
@@ -1628,6 +1639,12 @@ class livebox extends eqLogic {
 		return $caller->getCallerName();
 	}
 
+	function format_time($isodate) {
+		$date = new DateTime($isodate, new DateTimeZone('UTC'));
+		date_timezone_set($date,  new DateTimeZone(config::byKey('timezone')));
+		return $date->format('Y-m-d H:i:s');
+	}
+
 	function fmt_date($timeStamp) {
 		setlocale(LC_TIME, 'fr_FR.utf8','fra');
 		return(ucwords(strftime("%a %d %b %T",$timeStamp)));
@@ -1679,76 +1696,76 @@ class liveboxCmd extends cmd
 			throw new Exception(__("Equipement désactivé impossible d'exécuter la commande : " . $this->getHumanName(), __FILE__));
 		}
 		log::add('livebox','debug','get '.$this->getLogicalId());
-        if ($eqLogic->getConfiguration('type','') == 'box') {
-            $option = array();
-            if ($eqLogic->getConfiguration('productClass','') == 'Livebox 4' || $eqLogic->getConfiguration('productClass','') == 'Livebox Fibre') {
-                $mibs0 = 'wifi0_bcm';
-                $mibs1 = 'wifi0_quan';
-            } else {
-                $mibs0 = 'wifi0_ath';
-                $mibs1 = 'wifi1_ath';
-            }
-            switch ($this->getLogicalId()) {
-                case "reset":
-                    $page = null;
-                    break;
-                case "reboot":
-                    $page = "reboot";
-                    break;
-                case "ring":
-                    $page = "ring";
-                    break;
-                case "wpspushbutton":
-                    $page = "wpspushbutton";
-                    break;
-                case "wifi2.4on":
-                    $option = array('mibs' => $mibs0, 'value' => 'true');
-                    $page = "changewifi";
-                    break;
-                case "wifion":
-                    $option = array('mibs' => $mibs0, 'value' => 'true');
-                    $page = "changewifi";
-                    break;
-                case "wifi2.4off":
-                    $option = array('mibs' => $mibs0, 'value' => 'false');
-                    $page = "changewifi";
-                    break;
-                case "wifioff":
-                    $option = array('mibs' => $mibs0, 'value' => 'false');
-                    $page = "changewifi";
-                    break;
-                case "wifi5on":
-                    $option = array('mibs' => $mibs1, 'value' => 'true');
-                    $page = "changewifi";
-                    break;
-                case "wifi5off":
-                    $option = array('mibs' => $mibs1, 'value' => 'false');
-                    $page = "changewifi";
-                    break;
-                case "guestwifion":
-                    $option = array('value' => 'true');
-                    $page = "changeguestwifi";
-                    break;
-                case "guestwifioff":
-                    $option = array('value' => 'false');
-                    $page = "changeguestwifi";
-                    break;
-            }
-            if ( $page != null ) {
-                $eqLogic->getCookiesInfo();
-                $content = $eqLogic->getPage($page, $option);
-                if ( $this->getLogicalId() != "reboot" ) {
-                    $eqLogic->refreshInfo();
-                    $eqLogic->logOut();
-                }
-                if ( $this->getLogicalId() != "ring" ) {
-                    $eqLogic->refreshInfo();
-                    $eqLogic->logOut();
-                }
-            } else {
-                throw new Exception(__('Commande non implémentée actuellement', __FILE__));
-            }
-        }
+		if ($eqLogic->getConfiguration('type','') == 'box') {
+			$option = array();
+			if ($eqLogic->getConfiguration('productClass','') == 'Livebox 4' || $eqLogic->getConfiguration('productClass','') == 'Livebox Fibre') {
+				$mibs0 = 'wifi0_bcm';
+				$mibs1 = 'wifi0_quan';
+			} else {
+				$mibs0 = 'wifi0_ath';
+				$mibs1 = 'wifi1_ath';
+			}
+			switch ($this->getLogicalId()) {
+				case "reset":
+					$page = null;
+					break;
+				case "reboot":
+					$page = "reboot";
+					break;
+				case "ring":
+					$page = "ring";
+					break;
+				case "wpspushbutton":
+					$page = "wpspushbutton";
+					break;
+				case "wifi2.4on":
+					$option = array('mibs' => $mibs0, 'value' => 'true');
+					$page = "changewifi";
+					break;
+				case "wifion":
+					$option = array('mibs' => $mibs0, 'value' => 'true');
+					$page = "changewifi";
+					break;
+				case "wifi2.4off":
+					$option = array('mibs' => $mibs0, 'value' => 'false');
+					$page = "changewifi";
+					break;
+				case "wifioff":
+					$option = array('mibs' => $mibs0, 'value' => 'false');
+					$page = "changewifi";
+					break;
+				case "wifi5on":
+					$option = array('mibs' => $mibs1, 'value' => 'true');
+					$page = "changewifi";
+					break;
+				case "wifi5off":
+					$option = array('mibs' => $mibs1, 'value' => 'false');
+					$page = "changewifi";
+					break;
+				case "guestwifion":
+					$option = array('value' => 'true');
+					$page = "changeguestwifi";
+					break;
+				case "guestwifioff":
+					$option = array('value' => 'false');
+					$page = "changeguestwifi";
+					break;
+			}
+			if ( $page != null ) {
+				$eqLogic->getCookiesInfo();
+				$content = $eqLogic->getPage($page, $option);
+				if ( $this->getLogicalId() != "reboot" ) {
+					$eqLogic->refreshInfo();
+					$eqLogic->logOut();
+				}
+				if ( $this->getLogicalId() != "ring" ) {
+					$eqLogic->refreshInfo();
+					$eqLogic->logOut();
+				}
+			} else {
+				throw new Exception(__('Commande non implémentée actuellement', __FILE__));
+			}
+		}
 		return true;
 	}
 

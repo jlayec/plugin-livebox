@@ -58,23 +58,23 @@ try {
 			}
 			ajax::success(utils::o2a($return));
 			break;
-        case 'syncLivebox':
-            if(init('what'))
-                $param=init('what');
-            else
-                $param=null;
-            log::add('livebox','debug','synchronisation manuelle : '.init('what'));
-            livebox::syncLivebox($param);
-            ajax::success();
-            break;
-        case 'deleteDisabledEQ':
-		    livebox::deleteDisabledEQ(init('what'));
-		    ajax::success();
-            break;
-        case 'noMoreIgnore':
-		    livebox::noMoreIgnore(init('what'));
-		    ajax::success();
-            break;
+		case 'syncLivebox':
+			if(init('what'))
+				$param=init('what');
+			else
+				$param=null;
+			log::add('livebox','debug','synchronisation manuelle : '.init('what'));
+			livebox::syncLivebox($param);
+			ajax::success();
+			break;
+		case 'deleteDisabledEQ':
+			livebox::deleteDisabledEQ(init('what'));
+			ajax::success();
+			break;
+		case 'noMoreIgnore':
+			livebox::noMoreIgnore(init('what'));
+			ajax::success();
+			break;
 	}
 	throw new \Exception('Aucune méthode correspondante');
 } catch (\Exception $e) {
