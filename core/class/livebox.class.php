@@ -1474,8 +1474,8 @@ class livebox extends eqLogic {
 						if($favorite == 1 ) {// Pas de lien sur les favoris
 							$callsTable .= "<td>$callerName</td>";
 						} else {
-							//$callsTable .= "<td><a class='btn-sm bt_plus' title='Ajouter $callerName " .$call["num"] ." en favori' onclick='addfavorite(\"" .$call["num"] . "\",\"" . $callerName . "\")'><i class='icon icon_green fas fa-heart '></i></a> $callerName</td>";
-                            $callsTable .= "<td><a class='btn-sm bt_plus' title='Ajouter $callerName " .$call["num"] ." en favori' onclick='alert(\"coucou\")'><i class='icon icon_green fas fa-heart '></i></a> $callerName</td>";
+							$callsTable .= "<td><a class='btn-sm bt_plus' title='Ajouter $callerName " .$call["num"] ." en favori' onclick='addfavorite(\"" .$call["num"] . "\",\"" . $callerName . "\")'><i class='icon icon_green fas fa-heart '></i></a> $callerName</td>";
+                            // $callsTable .= "<td><a class='btn-sm bt_plus' title='Ajouter $callerName " .$call["num"] ." en favori' onclick='alert(\"coucou\")'><i class='icon icon_green fas fa-heart '></i></a> $callerName</td>";
 						}
 						$callsTable .= "<td>".$this->fmt_numtel($call["num"])."</td><td>".$this->fmt_date($call["timestamp"])."</td><td>".$this->fmt_duree($call["duree"])."</td><td>".$call["icon"]."</td></tr>";
 						$call["processed"] = 1;
