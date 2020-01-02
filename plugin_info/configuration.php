@@ -69,6 +69,12 @@ if (!isConnect()) {
 				<input class="configKey form-control" data-l1key="minincallduration" />
 			</div>
 		</div>
+		<div class="form-group">
+			<label class="col-sm-4 control-label">{{Regroupement par numéro de téléphone dans la liste des appels}}</label>
+			<div class="col-sm-2">
+				<input type="checkbox" class="configKey tooltips" data-l1key="groupCallsByPhone">
+			</div>
+		</div>
 	</fieldset>
 </form>
 <form class="form-horizontal">
@@ -76,7 +82,7 @@ if (!isConnect()) {
 	<legend>{{Favoris}}
 	  <a class="btn btn-xs btn-success pull-right" id="bt_addFavorite"><i class="fas fa-plus"></i> {{Ajouter}}</a>
 	</legend>
-	<table class="table table-bordered table-condensed" id="table_favorites" style="width:50% !important;">
+	<table class="table table-bordered table-condensed" id="table_favorites" style="width:50% !important;"">
 	  <thead>
 		<tr>
 		  <th style="display: none; witdh: auto;">{{Id}}</th>

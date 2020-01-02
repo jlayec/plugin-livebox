@@ -34,6 +34,29 @@ class livebox extends eqLogic {
 		}
 	}
 
+	public static function addFavorite($num,$name) {
+		log::add('livebox','debug', __FUNCTION__ ." Num=$num Name=$name");
+		$responses = livebox_calls::searchByPhone($num);
+		if (!is_array($responses) || count($responses) ===0) {
+			// Il n'est pas dans la base, Ajout.
+			$caller = new livebox_calls;
+			$caller->setStartDate(date('Y-m-d H:i:s'));
+			$caller->setPhone($this->normalizePhone($num));
+			$caller->setCallerName($name);
+			$caller->setFavorite(1);
+			$caller->setIsFetched(1);
+			$caller->save();
+		} else {
+			// Il est déjà dans la base
+			log::add('livebox','debug','caller already stored');
+			// On prend le premier retourné car priorité aux favoris et aux plus récents.
+			$caller = $responses[0];
+			$caller->setFavorite(1);
+			$caller->setIsFetched(1);
+			$caller->save();
+		}
+	}
+
 	public static function saveFavorites() {
 		$sql = 'UPDATE livebox_calls
 				SET `favorite`=0, `isFetched`=0
@@ -1417,7 +1440,7 @@ class livebox extends eqLogic {
 						$missed = 0;
 						$icon = '<i class="icon icon_green techno-phone2"</i>';
 					}
-					$calls[] = array("timestamp" => $ts, "num" => $Call_numero, "duree" => $Call_duree, "in" => $in, "missed" => $missed, "icon" => $icon);
+					$calls[] = array("timestamp" => $ts, "num" => $Call_numero, "duree" => $Call_duree, "in" => $in, "missed" => $missed, "icon" => $icon, "processed" => 0);
 
 				}
 				if(count($calls) > 1) {
@@ -1439,24 +1462,37 @@ class livebox extends eqLogic {
 
 			//	Tous les appels
 			if ($totalCallsNumber > 0) {
+				$groupCallsByPhone = config::byKey('groupCallsByPhone',__CLASS__, 0);
 				$callsTable = "$tabstyle<table border=1>";
-				if($usepagesjaunes == 1) {
+                $callScript = '<script>';
 					$callsTable .=	"<tr><th>Nom</th><th>Numéro</th><th>Date</th><th>Durée</th><th></th></tr>";
-				} else {
-					$callsTable .=	"<tr><th>Numéro</th><th>Date</th><th>Durée</th><th></th></tr>";
+				$favorite=0;
+				foreach($calls as &$call) {
+					if($call["processed"] == 0) {
+						$callerName = trim($this->getCallerName($call["num"],$favorite));
+						$callsTable .= "<tr>";
+						if($favorite == 1 ) {// Pas de lien sur les favoris
+							$callsTable .= "<td>$callerName</td>";
+						} else {
+							//$callsTable .= "<td><a class='btn-sm bt_plus' title='Ajouter $callerName " .$call["num"] ." en favori' onclick='addfavorite(\"" .$call["num"] . "\",\"" . $callerName . "\")'><i class='icon icon_green fas fa-heart '></i></a> $callerName</td>";
+                            $callsTable .= "<td><a class='btn-sm bt_plus' title='Ajouter $callerName " .$call["num"] ." en favori' onclick='alert(\"coucou\")'><i class='icon icon_green fas fa-heart '></i></a> $callerName</td>";
+						}
+						$callsTable .= "<td>".$this->fmt_numtel($call["num"])."</td><td>".$this->fmt_date($call["timestamp"])."</td><td>".$this->fmt_duree($call["duree"])."</td><td>".$call["icon"]."</td></tr>";
+						$call["processed"] = 1;
+						if($groupCallsByPhone == 1) { // regroupement des appels par numero
+							foreach($calls as &$call2) {
+								if($call2["processed"] == 0 && $call["num"] == $call2["num"]) {
+									$callsTable .= "<tr><td></td><td></td>";
+									$callsTable .= "<td>".$this->fmt_date($call2["timestamp"])."</td><td>".$this->fmt_duree($call2["duree"])."</td><td>".$call2["icon"]."</td></tr>";
+									$call2["processed"] = 1;
+								}
+							}
 				}
-				foreach($calls as $key => $call) {
-					if($usepagesjaunes == 1) {
-						$callerName = trim($this->getCallerName($call["num"]));
-						log::add('livebox','debug','Caller name returned by getCallerName $'.$callerName.'$');
-						$callsTable .= "<tr><td>" . $callerName ."</td><td>".$this->fmt_numtel($call["num"])."</td><td>".$this->fmt_date($call["timestamp"])."</td><td>".$this->fmt_duree($call["duree"])."</td><td>".$call["icon"]."</td></tr>";
-					} else {
-					$callsTable .= "<tr><td>".$this->fmt_numtel($call["num"])."</td><td>".$this->fmt_date($call["timestamp"])."</td><td>".$this->fmt_duree($call["duree"])."</td><td>".$call["icon"]."</td></tr>";
 				}
 				}
 				$callsTable .= "</table>";
 			}
-
+            log::add('livebox','debug','table '.$callsTable);
 			//	Appels sortants
 			if ($outCallsNumber > 0) {
 				$outCallsTable = "$tabstyle<table border=1>";
@@ -1592,11 +1628,13 @@ class livebox extends eqLogic {
 		return $num;
 	}
 
-	function getCallerName($num) {
+	function getCallerName($num,&$favorite=0) {
 		$normalizedPhone = $this->normalizePhone($num);
 		if (strlen($num) == 0) {
+			$favorite=1;
 			return 'Anonyme';
 		}
+		$usepagesjaunes = config::byKey('pagesjaunes','livebox', false);
 		$responses = livebox_calls::searchByPhone($normalizedPhone);
 		if (!is_array($responses) || count($responses) ===0) {
 			log::add('livebox','debug','caller not stored');
@@ -1605,15 +1643,21 @@ class livebox extends eqLogic {
 			$caller->setStartDate(date('Y-m-d H:i:s'));
 			$caller->setPhone($normalizedPhone);
 			$caller->setFavorite(0);
-			if ($this->_pagesJaunesRequests < self::MAX_PAGESJAUNES && strlen($num) == 10) {
-				log::add('livebox','debug','we fetch the name');
-				$this->_pagesJaunesRequests++;
-				$callerName = $this->getPjCallerName($normalizedPhone);
-				$caller->setCallerName($callerName);
-				$caller->setIsFetched(1);
+			$favorite = 0;
+			if($usepagesjaunes == 1) {
+                if ($this->_pagesJaunesRequests < self::MAX_PAGESJAUNES && strlen($num) == 10) {
+                    log::add('livebox','debug','we fetch the name');
+                    $this->_pagesJaunesRequests++;
+                    $callerName = $this->getPjCallerName($normalizedPhone);
+                    $caller->setCallerName($callerName);
+                    $caller->setIsFetched(1);
+                } else {
+                    log::add('livebox','debug','store it but not fetched');
+                    $caller->setCallerName('');
+                    $caller->setIsFetched(0);
+                }
 			} else {
-				log::add('livebox','debug','store it but not fetched');
-				$caller->setCallerName('');
+				$caller->setCallerName('_');
 				$caller->setIsFetched(0);
 			}
 			$caller->save();
@@ -1622,20 +1666,23 @@ class livebox extends eqLogic {
 			log::add('livebox','debug','caller already stored');
 			// On prend le premier retourné car priorité aux favoris et aux plus récents.
 			$caller = $responses[0];
+			$favorite = $caller->getFavorite();
 			if ($caller->getIsFetched() == 0 && $caller->getFavorite() == 0) {
 				log::add('livebox','debug','but it is not fetched and not favorite');
-				if ($this->_pagesJaunesRequests < self::MAX_PAGESJAUNES && strlen($num) == 10) {
-					log::add('livebox','debug','we fetch the name');
-					$this->_pagesJaunesRequests++;
-					$callerName = $this->getPjCallerName($normalizedPhone);
-					log::add('livebox','debug','response from pages jaunes '.$callerName);
-					$caller->setCallerName($callerName);
-					$caller->setIsFetched(1);
-					log::add('livebox','debug','and we save it');
-					$caller->save();
-				}
-			}
-		}
+				if($usepagesjaunes == 1) {
+                    if ($this->_pagesJaunesRequests < self::MAX_PAGESJAUNES && strlen($num) == 10) {
+                        log::add('livebox','debug','we fetch the name');
+                        $this->_pagesJaunesRequests++;
+                        $callerName = $this->getPjCallerName($normalizedPhone);
+                        log::add('livebox','debug','response from pages jaunes '.$callerName);
+                        $caller->setCallerName($callerName);
+                        $caller->setIsFetched(1);
+                        log::add('livebox','debug','and we save it');
+                        $caller->save();
+                    }
+			    }
+		    }
+	    }
 		return $caller->getCallerName();
 	}
 
