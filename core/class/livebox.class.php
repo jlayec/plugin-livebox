@@ -72,10 +72,7 @@ class livebox extends eqLogic {
             $favoris[] =  array(
                 'id' => $callerId,
                 'callerName' => $name,
-                'phone' => $num,
-                'startDate' => date('Y-m-d H:i:s'),
-                'isFetched' => 1,
-                'favorite' => 1
+                'phone' => $num
             );
             config::save('favorites',$favoris,'livebox');
         }
