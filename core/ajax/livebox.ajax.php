@@ -26,15 +26,8 @@ try {
 
 	switch (init('action')){
         case 'addFavorite':
-            log::add('livebox','debug', "Add Favorite Num=".init('num')." Name=".init('name'));
             ajax::success(livebox::addFavorite(init('num'), init('name')));
             break;
-		case 'getFavorites':
-			ajax::success(utils::o2a(livebox_calls::allFavorites()));
-			break;
-		case 'saveFavorites':
-			ajax::success(livebox::saveFavorites());
-			break;
 		case 'getLinkCalendar':
 			$livebox = livebox::byId(init('id'));
 			if (!is_object($livebox)) {

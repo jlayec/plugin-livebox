@@ -45,22 +45,6 @@ class livebox extends eqLogic {
 		return $num;
 	}
 	public static function addFavorite($num,$name) {
-		$responses = livebox_calls::searchByPhone($num);
-		if (!is_array($responses) || count($responses) ===0) {
-			// Il n'est pas dans la base, Ajout.
-			$caller = new livebox_calls;
-			$caller->setPhone(self::normalizePhone($num));
-		} else {
-			// Il est déjà dans la base
-			// On prend le premier retourné car priorité aux favoris et aux plus récents.
-			$caller = $responses[0];
-        }
-        $caller->setStartDate(date('Y-m-d H:i:s'));  // Important pour qu'il soit bien le plus récent dans tous les cas.
-        $caller->setCallerName($name);
-        $caller->setFavorite(1);
-        $caller->setIsFetched(1);
-        $caller->save();
-        $callerId = $caller->getId();
         $favoris = config::byKey('favorites','livebox',array());
         foreach ($favoris as $favori) {
             if($favori['phone'] == $num){
@@ -70,7 +54,6 @@ class livebox extends eqLogic {
         }
         if(!$found){
             $favoris[] =  array(
-                'id' => $callerId,
                 'callerName' => $name,
                 'phone' => $num
             );
@@ -1433,7 +1416,6 @@ class livebox extends eqLogic {
 			$inCallsNumber = 0;
 			$missedCallsNumber = 0;
 			$setting = config::byKey('minincallduration','livebox', 5);
-			$usepagesjaunes = config::byKey('pagesjaunes','livebox', false);
 			$calls = array();
 
 			if ( isset($content["status"]) ) {
@@ -1487,26 +1469,38 @@ class livebox extends eqLogic {
 
 			//	Tous les appels
 			if ($totalCallsNumber > 0) {
+				$noDeroulantWidget = 0;
+				$cmd = $this->getCmd(null, 'callstable');
+				if ( is_object($cmd)) {
+					$widget_name = $cmd->getTemplate('dashboard');
+					if(strpos($widget_name,'::') !== false){
+						$name = explode('::',$widget_name);
+						$widget_name = $name[1];
+					}
+					if ($widget_name != 'deroulant' && $widget_name != 'deroulantv3') {
+						$noDeroulantWidget = 1;
+					}
+				}
 				$groupCallsByPhone = config::byKey('groupCallsByPhone',__CLASS__, 0);
 				$callsTable = "$tabstyle<table border=1>";
-                $callScript = '<script>';
 					$callsTable .=	"<tr><th>Nom</th><th>Numéro</th><th>Date</th><th>Durée</th><th></th></tr>";
 				$favorite=0;
 				foreach($calls as &$call) {
 					if($call["processed"] == 0) {
-						$callerName = trim($this->getCallerName($call["num"],$favorite));
+						$callNum = trim($call['num']);
+						$callerName = trim($this->getCallerName($callNum,$favorite));
 						$callsTable .= "<tr>";
-						if($favorite == 1 ) {// Pas de lien sur les favoris
-							$callsTable .= "<td>$callerName</td>";
+						$callsTable .= "<td id=\"Phone$callNum\">";
+						if($favorite == 1 || $noDeroulantWidget) {// Pas de lien sur les favoris
+							$callsTable .= "$callerName</td>";
 						} else {
-							$callsTable .= "<td><a class='btn-sm bt_plus' title='Ajouter $callerName " .$call["num"] ." en favori' onclick='addfavorite(\"" .$call["num"] . "\",\"" . $callerName . "\")'><i class='icon icon_green fas fa-heart '></i></a> $callerName</td>";
-                            // $callsTable .= "<td><a class='btn-sm bt_plus' title='Ajouter $callerName " .$call["num"] ." en favori' onclick='alert(\"coucou\")'><i class='icon icon_green fas fa-heart '></i></a> $callerName</td>";
+							$callsTable .= "<a class='btn-sm bt_plus' title='Ajouter $callerName $callNum en favori' onclick='addfavorite(\"" .$callNum . "\",\"" . $callerName . "\")'><i class='icon icon_green fas fa-heart '></i></a> $callerName</td>";
 						}
-						$callsTable .= "<td>".$this->fmt_numtel($call["num"])."</td><td>".$this->fmt_date($call["timestamp"])."</td><td>".$this->fmt_duree($call["duree"])."</td><td>".$call["icon"]."</td></tr>";
+						$callsTable .= "<td>".$this->fmt_numtel($callNum)."</td><td>".$this->fmt_date($call["timestamp"])."</td><td>".$this->fmt_duree($call["duree"])."</td><td>".$call["icon"]."</td></tr>";
 						$call["processed"] = 1;
 						if($groupCallsByPhone == 1) { // regroupement des appels par numero
 							foreach($calls as &$call2) {
-								if($call2["processed"] == 0 && $call["num"] == $call2["num"]) {
+								if($call2["processed"] == 0 && $callNum == $call2["num"]) {
 									$callsTable .= "<tr><td></td><td></td>";
 									$callsTable .= "<td>".$this->fmt_date($call2["timestamp"])."</td><td>".$this->fmt_duree($call2["duree"])."</td><td>".$call2["icon"]."</td></tr>";
 									$call2["processed"] = 1;
@@ -1517,7 +1511,7 @@ class livebox extends eqLogic {
 				}
 				$callsTable .= "</table>";
 			}
-            log::add('livebox','debug','table '.$callsTable);
+
 			//	Appels sortants
 			if ($outCallsNumber > 0) {
 				$outCallsTable = "$tabstyle<table border=1>";
@@ -1648,6 +1642,14 @@ class livebox extends eqLogic {
 			$favorite=1;
 			return 'Anonyme';
 		}
+		$favoris = config::byKey('favorites','livebox',array());
+		foreach ($favoris as $favori) {
+			if($favori['phone'] == $normalizedPhone){
+				$favorite = 1;
+				return $favori['callerName'];
+			}
+		}
+		// Ce n'est pas un favori
 		$usepagesjaunes = config::byKey('pagesjaunes','livebox', false);
 		$responses = livebox_calls::searchByPhone($normalizedPhone);
 		if (!is_array($responses) || count($responses) ===0) {
@@ -1656,7 +1658,6 @@ class livebox extends eqLogic {
 			$caller = new livebox_calls;
 			$caller->setStartDate(date('Y-m-d H:i:s'));
 			$caller->setPhone($normalizedPhone);
-			$caller->setFavorite(0);
 			$favorite = 0;
 			if($usepagesjaunes == 1) {
                 if ($this->_pagesJaunesRequests < self::MAX_PAGESJAUNES && strlen($num) == 10) {
@@ -1678,11 +1679,11 @@ class livebox extends eqLogic {
 		} else {
 			// Il est déjà dans la base
 			log::add('livebox','debug','caller already stored');
-			// On prend le premier retourné car priorité aux favoris et aux plus récents.
+			// On prend le premier retourné car priorité aux plus récents.
 			$caller = $responses[0];
-			$favorite = $caller->getFavorite();
-			if ($caller->getIsFetched() == 0 && $caller->getFavorite() == 0) {
-				log::add('livebox','debug','but it is not fetched and not favorite');
+			$favorite = 0;
+			if ($caller->getIsFetched() == 0) {
+				log::add('livebox','debug','but it is not fetched');
 				if($usepagesjaunes == 1) {
                     if ($this->_pagesJaunesRequests < self::MAX_PAGESJAUNES && strlen($num) == 10) {
                         log::add('livebox','debug','we fetch the name');
@@ -1874,7 +1875,6 @@ class livebox_calls {
 	private $phone;
 	private $startDate;
 	private $isFetched;
-	private $favorite;
 	protected $_changed = false;
 
 	public static function byId($_id) {
@@ -1894,7 +1894,7 @@ class livebox_calls {
 		log::add('livebox','debug','searchbyphone values ' .print_r($values, true));
 		$sql = 'SELECT ' . DB::buildField(__CLASS__) . '
 		FROM livebox_calls
-		WHERE phone=:phone ORDER BY favorite DESC, startDate DESC';
+		WHERE phone=:phone ORDER BY startDate DESC';
 		log::add('livebox','debug','searchbyphone sql ' .$sql);
 		return DB::Prepare($sql, $values, DB::FETCH_TYPE_ALL, PDO::FETCH_CLASS, __CLASS__);
 	}
@@ -1903,19 +1903,6 @@ class livebox_calls {
 		$sql = 'SELECT ' . DB::buildField(__CLASS__) . '
 		FROM livebox_calls';
 		return DB::Prepare($sql, array(), DB::FETCH_TYPE_ALL, PDO::FETCH_CLASS, __CLASS__);
-	}
-
-	public static function deleteAllFavorites() {
-		$sql = 'DELETE	from `livebox_calls` WHERE favorite = 1';
-		$row =	DB::Prepare($sql, array(), DB::FETCH_TYPE_ROW);
-	}
-
-	public static function allFavorites() {
-		$sql = 'SELECT ' . DB::buildField(__CLASS__) . '
-		FROM livebox_calls
-		WHERE favorite=1';
-		$result = DB::Prepare($sql, array(), DB::FETCH_TYPE_ALL, PDO::FETCH_CLASS, __CLASS__);
-		return $result;
 	}
 
 	/*	   * *********************Methode d'instance************************* */
@@ -1972,15 +1959,6 @@ class livebox_calls {
 	public function setIsFetched($_isFetched) {
 		$this->_changed = utils::attrChanged($this->_changed,$this->isFetched,$_isFetched);
 		$this->isFetched = $_isFetched;
-	}
-
-	public function getFavorite() {
-		return $this->favorite;
-	}
-
-	public function setFavorite($_favorite) {
-		$this->_changed = utils::attrChanged($this->_changed,$this->favorite,$_favorite);
-		$this->favorite = $_favorite;
 	}
 
 	public function getChanged() {
