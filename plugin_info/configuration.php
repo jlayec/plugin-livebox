@@ -82,10 +82,10 @@ if (!isConnect()) {
 	<legend>{{Favoris}}
 	  <a class="btn btn-xs btn-success pull-right" id="bt_addFavorite"><i class="fas fa-plus"></i> {{Ajouter}}</a>
 	</legend>
-	<table class="table table-bordered table-condensed" id="table_favorites" style="width:50% !important;">
+	<div class="tblfavorites">
+	<table class="table table-bordered table-condensed" id="table_favorites">
 	  <thead>
 		<tr>
-		  <th style="display: none; witdh: auto;">{{Id}}</th>
 		  <th>{{Nom}}</th>
 		  <th>{{Numéro de téléphone}}</th>
 		  <th>{{Action}}</th>
@@ -95,9 +95,18 @@ if (!isConnect()) {
 
 	  </tbody>
 	</table>
+	</div>
   </fieldset>
 </form>
-
+<style>
+	div.tblfavorites {
+		overflow-y:scroll;
+		border:#000000 1px solid;
+		min-height:15px;
+		max-height:180px;
+		width: 50%;
+	}
+</style>
 <script>
 $('#bt_noMoreIgnore').on('click', function () {
     $.ajax({// fonction permettant de faire de l'ajax
@@ -131,12 +140,10 @@ jeedom.config.load({
     if(data === false){
       return;
     }
+	data.sort((a, b) => a.callerName.localeCompare(b.callerName));
     var tr='';
     for(var i in data){
       tr += '<tr class="favorite">';
-      tr += '<td style="display: none; witdh: auto;">';
-      tr += '<input class="form-control favoriteAttr" data-l1key="id" value="'+data[i].id+'" disabled />';
-      tr += '</td>';
       tr += '<td>';
       tr += '<input class="form-control favoriteAttr" data-l1key="callerName" value="'+data[i].callerName+'" />';
       tr += '</td>';
@@ -154,6 +161,9 @@ jeedom.config.load({
 
 function livebox_postSaveConfiguration(){
   var favorites = $('#table_favorites .favorite').getValues('.favoriteAttr');
+  for( var i = favorites.length-1; i>=0;i--){
+	 if ( favorites[i].phone == '' || favorites[i].callerName == '') favorites.splice(i, 1);
+  }
   jeedom.config.save({
 	configuration:{'favorites' : favorites},
 	plugin : 'livebox',
@@ -164,31 +174,10 @@ function livebox_postSaveConfiguration(){
 
 	}
   });
-  $.ajax({
-	type: "POST",
-	url: "plugins/livebox/core/ajax/livebox.ajax.php",
-	data: {
-	  action: "saveFavorites",
-	},
-	dataType: 'json',
-	global: false,
-	error: function (request, status, error) {
-	  handleAjaxError(request, status, error);
-	},
-	success: function (data) {
-	  if (data.state != 'ok') {
-		$('#div_alert').showAlert({message: data.result, level: 'danger'});
-		return;
-	  }
-	}
-  });
 }
 
 $('#bt_addFavorite').off('click').on('click',function(){
   var tr = '<tr class="favorite">';
-  tr += '<td style="display: none; witdh: auto;">';
-  tr += '<input class="form-control favoriteAttr" data-l1key="id" disabled/>';
-  tr += '</td>';
   tr += '<td>';
   tr += '<input class="form-control favoriteAttr" data-l1key="callerName" />';
   tr += '</td>';
