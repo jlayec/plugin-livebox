@@ -46,6 +46,7 @@ class livebox extends eqLogic {
 	}
 	public static function addFavorite($num,$name) {
         $favoris = config::byKey('favorites','livebox',array());
+		$found = false;
         foreach ($favoris as $favori) {
             if($favori['phone'] == $num){
                 $found = true;
@@ -62,36 +63,6 @@ class livebox extends eqLogic {
 
 	}
 
-	public static function saveFavorites() {
-		$sql = 'UPDATE livebox_calls
-				SET `favorite`=0, `isFetched`=0
-				WHERE `favorite`=1';
-		try {
-			DB::Prepare($sql, array('value' => $i), DB::FETCH_TYPE_ROW);
-		} catch (Exception $e) {
-
-		}
-		$favoris = config::byKey('favorites','livebox', array());
-		foreach ( $favoris as $favori ) {
-			$callerName = trim($favori['callerName']);
-			$phone = trim($favori['phone']);
-            log::add('livebox','debug','saveFavorites '.$callerName . ' ' .$phone);
-			if ($callerName != '' && $phone != '') {
-				$caller = new livebox_calls;
-				if (isset($favori['id']) && $favori['id'] != '') {
-					$caller->setId($favori['id']);
-				}
-				$caller->setCallerName($callerName);
-				$caller->setStartDate(date('Y-m-d H:i:s'));
-				$caller->setPhone($phone);
-				$caller->setIsFetched(1);
-				$caller->setFavorite(1);
-                log::add('livebox','debug','caller ' . print_r($caller, true));
-				$caller->save();
-                
-			}
-		}
-	}
 	public static function nameExists($name) {
 			$allLivebox=eqLogic::byType('livebox');
 			foreach($allLivebox as $u) {
@@ -1713,11 +1684,12 @@ class livebox extends eqLogic {
 	}
 
 	function fmt_duree($duree) {
-		$h = floor(((float)$duree)/3600); $m = floor(((float)$duree)/60); $s = $duree%60;
+		if (floor($duree)==0) return '0s';
+		$h = floor($duree/3600); $m = floor(($duree%3600)/60); $s = $duree%60;
 		$fmt = '';
 		if($h>0) $fmt .= $h.'h ';
-		if($m>0) $fmt .= $m.'mn ';
-		$fmt .= $s.'s';
+		if($m>0) $fmt .= $m.'min ';
+		if($s>0) $fmt .= $s.'s';
 		return($fmt);
 	}
 
@@ -1731,13 +1703,15 @@ class livebox extends eqLogic {
 			}
 			if(strlen($num) == 10) {
 				$fmt = substr($num,0,2) .' '.substr($num,2,2) .' '.substr($num,4,2) .' '.substr($num,6,2) .' '.substr($num,8);
-				return("<a target=_blank href=\"https://www.pagesjaunes.fr/annuaireinverse/recherche?quoiqui=".$num."&proximite=0\">".$fmt."</a>");
+				$usepagesjaunes = config::byKey('pagesjaunes','livebox', false);
+				if($usepagesjaunes == 1) {
+					return($fmt);
 			} else {
-				return("<a target=_blank href=\"https://www.pagesjaunes.fr/annuaireinverse/recherche?quoiqui=".$num."&proximite=0\">".$num."</a>");
+					return("<a target=_blank href=\"https://www.pagesjaunes.fr/annuaireinverse/recherche?quoiqui=".$num."&proximite=0\">".$fmt."</a>");
 			}
-		} else {
-			return($num);
 		}
+	}
+		return($num);
 	}
 }
 

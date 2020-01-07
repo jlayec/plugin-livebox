@@ -20,15 +20,18 @@ try {
 	require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
 	include_file('core', 'authentification', 'php');
 
-	if (!isConnect('admin')) {
+	if (!isConnect()) {
 		throw new \Exception('401 Unauthorized');
 	}
 
 	switch (init('action')){
-        case 'addFavorite':
-            ajax::success(livebox::addFavorite(init('num'), init('name')));
-            break;
+		case 'addFavorite':
+			ajax::success(livebox::addFavorite(init('num'), init('name')));
+			break;
 		case 'getLinkCalendar':
+			if (!isConnect('admin')) {
+				throw new Exception(__('401 - Accès non autorisé', __FILE__));
+			}
 			$livebox = livebox::byId(init('id'));
 			if (!is_object($livebox)) {
 				throw new Exception(__('Equipement Livebox non trouvé : ', __FILE__) . init('id'));
@@ -56,6 +59,9 @@ try {
 			ajax::success(utils::o2a($return));
 			break;
 		case 'syncLivebox':
+			if (!isConnect('admin')) {
+				throw new \Exception('401 Unauthorized');
+			}
 			if(init('what'))
 				$param=init('what');
 			else
@@ -65,10 +71,16 @@ try {
 			ajax::success();
 			break;
 		case 'deleteDisabledEQ':
+			if (!isConnect('admin')) {
+				throw new \Exception('401 Unauthorized');
+			}
 			livebox::deleteDisabledEQ(init('what'));
 			ajax::success();
 			break;
 		case 'noMoreIgnore':
+			if (!isConnect('admin')) {
+				throw new \Exception('401 Unauthorized');
+			}
 			livebox::noMoreIgnore(init('what'));
 			ajax::success();
 			break;
