@@ -6,7 +6,12 @@ sendVarToJS('eqType', 'livebox');
 $eqLogics = eqLogic::byType('livebox');
 
 $has = ["box"=>false,"cli"=>false];
+
 foreach ($eqLogics as $eqLogic) {
+	if ($eqLogic->getConfiguration('type') == '') {
+		$eqLogic->setConfiguration('type', 'box');
+		$eqLogic->save();
+	}
 	$type=$eqLogic->getConfiguration('type','');
 	if($type) {
 		$has[$type]=true;

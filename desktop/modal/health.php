@@ -25,18 +25,66 @@ $eqLogics = livebox::byType('livebox');
 	<thead>
 		<tr>
 			<th>{{Module}}</th>
-			<th>{{ID}}</th>
+			<th>{{Adresse MAC}}</th>
 			<th>{{IP}}</th>
-			<th>{{Date création}}</th>
+			<th>{{Type}}</th>
+			<th>{{Présent}}</th>
+			<th>{{Première connexion}}</th>
+			<th>{{Dernière connexion}}</th>
+			<th>{{Dernier changement}}</th>
 		</tr>
 	</thead>
 	<tbody>
 	 <?php
 foreach ($eqLogics as $eqLogic) {
 	echo '<tr><td><a href="' . $eqLogic->getLinkToConfiguration() . '" style="text-decoration: none;">' . $eqLogic->getHumanName(true) . '</a></td>';
-	echo '<td><span class="label label-info" style="font-size : 1em;">' . $eqLogic->getId() . '</span></td>';
-	echo '<td><span class="label label-info" style="font-size : 1em;">' . $eqLogic->getConfiguration('ip') . '</span></td>';
-	echo '<td><span class="label label-info" style="font-size : 1em;">' . $eqLogic->getConfiguration('createtime') . '</span></td></tr>';
+
+	if ($eqLogic->getConfiguration('type')=='box') {
+		echo '<td><span class="label label-info" style="font-size : 1em;">' . $eqLogic->getConfiguration('BaseMAC') . '</span></td>';
+		echo '<td><span class="label label-info" style="font-size : 1em;">' . $eqLogic->getConfiguration('ip') . '</span></td>';
+	} else {
+		echo '<td><span class="label label-info" style="font-size : 1em;">' . $eqLogic->getConfiguration('macAddress') . '</span></td>';
+		$clicmd = $eqLogic->getCmd('info', 'ip');
+		$value = '';
+		if (is_object($clicmd)) {
+			 $value = $clicmd->execCmd();
+		}
+		echo '<td><span class="label label-info" style="font-size : 1em;">' . $value . '</span></td>';
+	}
+	if ($eqLogic->getConfiguration('type')=='box') {
+		echo '<td><span class="label label-info" style="font-size : 1em;">' . $eqLogic->getConfiguration('productClass') . '</span></td>';
+	} else {
+		echo '<td><span class="label label-info" style="font-size : 1em;">' . $eqLogic->getConfiguration('deviceType') . '</span></td>';
+	}
+	if ($eqLogic->getConfiguration('type')=='cli') {
+		$clicmd = $eqLogic->getCmd('info', 'present');
+		$value = '';
+		if (is_object($clicmd)) {
+			 $value = $clicmd->execCmd() ? 'Oui' : 'Non';
+		}
+		echo '<td><span class="label label-info" style="font-size : 1em;">' . $value . '</span></td>';
+		$clicmd = $eqLogic->getCmd('info', 'firstseen');
+		$value = '';
+		if (is_object($clicmd)) {
+			$value = $clicmd->execCmd();
+		}
+		echo '<td><span class="label label-info" style="font-size : 1em;">' . $value . '</span></td>';
+		$clicmd = $eqLogic->getCmd('info', 'lastlogin');
+		$value = '';
+		if (is_object($clicmd)) {
+			$value = $clicmd->execCmd();
+		}
+		echo '<td><span class="label label-info" style="font-size : 1em;">' . $value . '</span></td>';
+		$clicmd = $eqLogic->getCmd('info', 'lastchanged');
+		$value = '';
+		if (is_object($clicmd)) {
+			$value = $clicmd->execCmd();
+		}
+		echo '<td><span class="label label-info" style="font-size : 1em;">' . $value . '</span></td>';
+	} else {
+		echo '<td></td><td></td><td></td>';
+	}
+	echo '</tr>';
 }
 ?>
 	</tbody>

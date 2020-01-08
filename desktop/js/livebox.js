@@ -5,7 +5,10 @@
 
 $('.eqLogicAttr[data-l1key=configuration][data-l2key=type]').on('change',function(){
 	if ($(this).value() == 'box') {
-
+		$('#div_goCarte').show();
+		$('#div_ipBox').show();
+		$('#div_adminBox').show();
+		$('#div_passBox').show();
 	} else {
 		$('#div_goCarte').hide();
 		$('#div_ipBox').hide();
@@ -45,7 +48,7 @@ function printEqLogic(_eqLogic) {
 	}
 	if (_eqLogic.configuration.type=="cli") {
 		printEqLogicHelper("{{Type}}","deviceType",_eqLogic);
-		printEqLogicHelper("{{Adresse MAC}}","mac",_eqLogic);
+		printEqLogicHelper("{{Adresse MAC}}","macAddress",_eqLogic);
 		$('#div_goCarte').hide();
 		$('#div_ipBox').hide();
 		$('#div_adminBox').hide();

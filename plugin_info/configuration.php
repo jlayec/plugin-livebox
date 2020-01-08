@@ -109,53 +109,53 @@ if (!isConnect()) {
 </style>
 <script>
 $('#bt_noMoreIgnore').on('click', function () {
-    $.ajax({// fonction permettant de faire de l'ajax
-        type: "POST", // methode de transmission des données au fichier php
-        url: "plugins/livebox/core/ajax/livebox.ajax.php", // url du fichier php
-        data: {
-            action: "noMoreIgnore",
-            what: "clients"
-        },
-        dataType: 'json',
-        error: function (request, status, error) {
-            handleAjaxError(request, status, error);
-        },
-        success: function (data) { // si l'appel a bien fonctionné
-        if (data.state != 'ok') {
-            $('#div_alert').showAlert({message: data.result, level: 'danger'});
-            return;
-        }
-        $('#div_alert').showAlert({message: '{{Action réussie}}', level: 'success'});
-      }
-    });
+	$.ajax({// fonction permettant de faire de l'ajax
+		type: "POST", // methode de transmission des données au fichier php
+		url: "plugins/livebox/core/ajax/livebox.ajax.php", // url du fichier php
+		data: {
+			action: "noMoreIgnore",
+			what: "clients"
+		},
+		dataType: 'json',
+		error: function (request, status, error) {
+			handleAjaxError(request, status, error);
+		},
+		success: function (data) { // si l'appel a bien fonctionné
+		if (data.state != 'ok') {
+			$('#div_alert').showAlert({message: data.result, level: 'danger'});
+			return;
+		}
+		$('#div_alert').showAlert({message: '{{Action réussie}}', level: 'success'});
+	  }
+	});
 });
 
 jeedom.config.load({
   configuration: 'favorites',
   plugin : 'livebox',
   error: function (error) {
-    $('#div_alert').showAlert({message: error.message, level: 'danger'});
+	$('#div_alert').showAlert({message: error.message, level: 'danger'});
   },
   success: function (data) {
-    if(data === false){
-      return;
-    }
+	if(data === false){
+	  return;
+	}
 	if (data.length > 1 ) data.sort((a, b) => a.callerName.localeCompare(b.callerName));
-    var tr='';
-    for(var i in data){
-      tr += '<tr class="favorite">';
-      tr += '<td>';
-      tr += '<input class="form-control favoriteAttr" data-l1key="callerName" value="'+data[i].callerName+'" />';
-      tr += '</td>';
-      tr += '<td>';
-      tr += '<input class="form-control favoriteAttr" data-l1key="phone" value="'+data[i].phone+'" />';
-      tr += '</td>';
-      tr += '<td>';
-      tr += '<a class="btn btn-default btn-xs bt_removeFavorite pull-right"><i class="fas fa-minus"></i></a>';
-      tr += '</td>';
-      tr += '</tr>';
-    }
-    $('#table_favorites tbody').empty().append(tr);
+	var tr='';
+	for(var i in data){
+	  tr += '<tr class="favorite">';
+	  tr += '<td>';
+	  tr += '<input class="form-control favoriteAttr" data-l1key="callerName" value="'+data[i].callerName+'" />';
+	  tr += '</td>';
+	  tr += '<td>';
+	  tr += '<input class="form-control favoriteAttr" data-l1key="phone" value="'+data[i].phone+'" />';
+	  tr += '</td>';
+	  tr += '<td>';
+	  tr += '<a class="btn btn-default btn-xs bt_removeFavorite pull-right"><i class="fas fa-minus"></i></a>';
+	  tr += '</td>';
+	  tr += '</tr>';
+	}
+	$('#table_favorites tbody').empty().append(tr);
   }
 });
 

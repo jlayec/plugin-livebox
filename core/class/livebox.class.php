@@ -44,22 +44,29 @@ class livebox extends eqLogic {
 		}
 		return $num;
 	}
+
+	public static function format_time($isodate) {
+		$date = new DateTime($isodate, new DateTimeZone('UTC'));
+		date_timezone_set($date,  new DateTimeZone(config::byKey('timezone')));
+		return $date->format('Y-m-d H:i:s');
+	}
+
 	public static function addFavorite($num,$name) {
-        $favoris = config::byKey('favorites','livebox',array());
+		$favoris = config::byKey('favorites','livebox',array());
 		$found = false;
-        foreach ($favoris as $favori) {
-            if($favori['phone'] == $num){
-                $found = true;
-                break;
-            }
-        }
-        if(!$found){
-            $favoris[] =  array(
-                'callerName' => $name,
-                'phone' => $num
-            );
-            config::save('favorites',$favoris,'livebox');
-        }
+		foreach ($favoris as $favori) {
+			if($favori['phone'] == $num){
+				$found = true;
+				break;
+			}
+		}
+		if(!$found){
+			$favoris[] =  array(
+				'callerName' => $name,
+				'phone' => $num
+			);
+			config::save('favorites',$favoris,'livebox');
+		}
 
 	}
 
@@ -90,15 +97,15 @@ class livebox extends eqLogic {
 								$ignoredClients=config::byKey('ignoredClients','livebox',[],true);
 								$mac = $client['Key'];
 								if(!in_array($mac,$ignoredClients)) {
-									$name= (isset($client["Name"]) && $client["Name"])?$client["Name"]:$mac;
-									if(self::nameExists($name)) {
-										log::add('livebox', 'debug', "Nom en double ".$name." renommé en ".$name.'_'.$mac);
-										$name=$name.'_'.$mac;
-									}
 									$jsta = livebox::byLogicalId($mac, 'livebox');
 									if (!is_object($jsta)) {
 										log::add('livebox', 'info', "Trouvé Client ".$name."(".$mac."):".json_encode($client));
 										$eqLogic = new livebox();
+										$name= (isset($client["Name"]) && $client["Name"])?$client["Name"]:$mac;
+										if(self::nameExists($name)) {
+											log::add('livebox', 'debug', "Nom en double ".$name." renommé en ".$name.'_'.$mac);
+											$name=$name.'_'.$mac;
+										}
 										$eqLogic->setName($name);
 										$eqLogic->setIsEnable(0);
 										$eqLogic->setIsVisible(0);
@@ -106,15 +113,14 @@ class livebox extends eqLogic {
 										$eqLogic->setEqType_name('livebox');
 										if($defaultRoom) $eqLogic->setObject_id($defaultRoom);
 										$eqLogic->setConfiguration('type', 'cli');
-										$eqLogic->setConfiguration('mac',$mac);
+										$eqLogic->setConfiguration('macAddress',$mac);
 									} else {
 										log::add('livebox', 'info', "Mise à jour Client ".$name."(".$mac."):".json_encode($client));
 										$eqLogic = $jsta;
 									}
-									$eqLogic->setConfiguration('ipAddress',$client["IPAddress"]);
+									$eqLogic->setConfiguration('macAddress',$mac);
 									$eqLogic->setConfiguration('image',$eqLogic->getImage());
 									$eqLogic->setConfiguration('deviceType',$client["DeviceType"]);
-									$eqLogic->setConfiguration('active',$client["Active"]);
 									$eqLogic->save();
 
 									if(!is_object($jsta)) { // NEW
@@ -1113,12 +1119,12 @@ class livebox extends eqLogic {
 				$this->logOut();
 			}
 		} else if ($this->getConfiguration('type','') == 'cli') {
-			$cmd = $this->getCmd(null, 'lastseen');
+			$cmd = $this->getCmd(null, 'lastlogin');
 			if ( ! is_object($cmd)) {
 				$cmd = new liveboxCmd();
-				$cmd->setName('Vu dernière fois');
+				$cmd->setName('Dernière connexion');
 				$cmd->setEqLogic_id($this->getId());
-				$cmd->setLogicalId('lastseen');
+				$cmd->setLogicalId('lastlogin');
 				$cmd->setType('info');
 				$cmd->setSubType('string');
 				$cmd->setGeneric_type( 'GENERIC_INFO');
@@ -1129,9 +1135,22 @@ class livebox extends eqLogic {
 			$cmd = $this->getCmd(null, 'firstseen');
 			if ( ! is_object($cmd)) {
 				$cmd = new liveboxCmd();
-				$cmd->setName('Vu première Fois');
+				$cmd->setName('Première connexion');
 				$cmd->setEqLogic_id($this->getId());
 				$cmd->setLogicalId('firstseen');
+				$cmd->setType('info');
+				$cmd->setSubType('string');
+				$cmd->setGeneric_type( 'GENERIC_INFO');
+				$cmd->setIsVisible(1);
+				$cmd->setIsHistorized(0);
+				$cmd->save();
+			}
+			$cmd = $this->getCmd(null, 'lastchanged');
+			if ( ! is_object($cmd)) {
+				$cmd = new liveboxCmd();
+				$cmd->setName('Dernier changement');
+				$cmd->setEqLogic_id($this->getId());
+				$cmd->setLogicalId('lastchanged');
 				$cmd->setType('info');
 				$cmd->setSubType('string');
 				$cmd->setGeneric_type( 'GENERIC_INFO');
@@ -1179,12 +1198,12 @@ class livebox extends eqLogic {
 				$cmd->save();
 			}
 			$cmdId = $cmd->getId();
-			$cmd = $this->getCmd(null, 'blockcli');
+			$cmd = $this->getCmd(null, 'block_cli');
 			if ( ! is_object($cmd)) {
 				$cmd = new liveboxCmd();
 				$cmd->setName('Bloquer');
 				$cmd->setEqLogic_id($this->getId());
-				$cmd->setLogicalId('blockcli');
+				$cmd->setLogicalId('block_cli');
 				$cmd->setType('action');
 				$cmd->setSubType('other');
 				$cmd->setGeneric_type( 'SWITCH_ON');
@@ -1192,12 +1211,12 @@ class livebox extends eqLogic {
 				$cmd->setIsVisible(1);
 				$cmd->save();
 			}
-			$cmd = $this->getCmd(null, 'unblockcli');
+			$cmd = $this->getCmd(null, 'unblock_cli');
 			if ( ! is_object($cmd)) {
 				$cmd = new liveboxCmd();
 				$cmd->setName('Débloquer');
 				$cmd->setEqLogic_id($this->getId());
-				$cmd->setLogicalId('unblockcli');
+				$cmd->setLogicalId('unblock_cli');
 				$cmd->setType('action');
 				$cmd->setSubType('other');
 				 $cmd->setGeneric_type( 'SWITCH_OFF');
@@ -1529,15 +1548,80 @@ class livebox extends eqLogic {
 		$this->checkAndUpdateCmd('missedcallstable', $missedCallsTable);
 
 		$content = $this->getPage("devicelist");
+		// $ignoredClients=config::byKey('ignoredClients','livebox',[],true);
 		if ( $content !== false ) {
 			$eqLogic_cmd = $this->getCmd(null, 'devicelist');
 			$devicelist = array();
-			if ( isset($content["status"]) )
-			{
-				foreach ( $content["status"] as $equipement ) {
-					if ( $equipement["Active"] && isset($equipement["IPAddressSource"]) && $equipement["IPAddressSource"] == "DHCP" )
-					{
-						array_push($devicelist, $equipement["Name"]);
+			$activeclients = array();
+			if ( isset($content["status"]) ) {
+				foreach ( $content["status"] as $client ) {
+					if ( isset($client["IPAddressSource"]) && ($client["IPAddressSource"] == "DHCP" || $equipement["IPAddressSource"] == "Static")) {
+						array_push($devicelist, $client["Name"]);
+						$mac = $client['Key'];
+						$activeclients[$mac] = $client['Active'];
+						$jsta = livebox::byLogicalId($mac, 'livebox');
+						if (is_object($jsta) && $jsta->getConfiguration('type','') == 'cli') {
+							// Objet client existant.
+							if ($jsta->getIsEnable()){
+								$clicmd = $jsta->getCmd(null, 'lastlogin');
+								if (is_object($clicmd) && isset($client["LastConnection"])) {
+										$value = livebox::format_time($client['LastConnection']);
+										$jsta->checkAndUpdateCmd('lastlogin', $value);
+								}
+								$clicmd = $jsta->getCmd(null, 'firstseen');
+								if (is_object($clicmd) && isset($client["FirstSeen"])) {
+									$value = livebox::format_time($client['FirstSeen']);
+									$jsta->checkAndUpdateCmd('firstseen', $value);
+								}
+								$clicmd = $jsta->getCmd(null, 'lastchanged');
+								if (is_object($clicmd) && isset($client["LastChanged"])) {
+										$value = livebox::format_time($client['LastChanged']);
+										$jsta->checkAndUpdateCmd('lastchanged', $value);
+								}
+								$clicmd = $jsta->getCmd(null, 'ip');
+								if (is_object($clicmd) && isset($client["IPAddress"])) {
+										$jsta->checkAndUpdateCmd('ip', $client['IPAddress']);
+								}
+							} else {
+								// Client inactif.
+							}
+						} else if (!is_object($jsta)) {
+							// Nouveau client.
+							log::add('livebox', 'info', "Trouvé Client ".$name."(".$mac."):".json_encode($client));
+							$eqLogic = new livebox();
+							$name= (isset($client["Name"]) && $client["Name"])?$client["Name"]:$mac;
+							if(self::nameExists($name)) {
+								log::add('livebox', 'debug', "Nom en double ".$name." renommé en ".$name.'_'.$mac);
+								$name=$name.'_'.$mac;
+							}
+							$eqLogic->setName($name);
+							$eqLogic->setIsEnable(0);
+							$eqLogic->setIsVisible(0);
+							$eqLogic->setLogicalId($mac);
+							$eqLogic->setEqType_name('livebox');
+							$defaultRoom = intval(config::byKey('defaultParentObject','livebox','',true));
+							if($defaultRoom) $eqLogic->setObject_id($defaultRoom);
+							$eqLogic->setConfiguration('type', 'cli');
+							$eqLogic->setConfiguration('mac',$mac);
+							$eqLogic->setConfiguration('image',$eqLogic->getImage());
+							$eqLogic->setConfiguration('deviceType',$client["DeviceType"]);
+							$eqLogic->setConfiguration('active',$client["Active"]);
+							$eqLogic->save();
+						}
+					}
+				}
+				foreach (self::byType('livebox') as $eqLogicClient) {
+					if ($eqLogicClient->getConfiguration('type')=='cli') {
+						$clicmd = $eqLogicClient->getCmd(null, 'present');
+						if (is_object($clicmd)) {
+							if (isset($activeclients[$eqLogicClient->getLogicalId()]) && $activeclients[$eqLogicClient->getLogicalId()] == true) {
+								log::add('livebox','debug','Le client '.$eqLogicClient->getHumanName() . 'est actif');
+								$eqLogicClient->checkAndUpdateCmd('present', true);
+							} else {
+								log::add('livebox','debug','Le client '.$eqLogicClient->getHumanName() . 'est inactif');
+								$eqLogicClient->checkAndUpdateCmd('present', false);
+							}
+						}
 					}
 				}
 			}
@@ -1631,17 +1715,17 @@ class livebox extends eqLogic {
 			$caller->setPhone($normalizedPhone);
 			$favorite = 0;
 			if($usepagesjaunes == 1) {
-                if ($this->_pagesJaunesRequests < self::MAX_PAGESJAUNES && strlen($num) == 10) {
-                    log::add('livebox','debug','we fetch the name');
-                    $this->_pagesJaunesRequests++;
-                    $callerName = $this->getPjCallerName($normalizedPhone);
-                    $caller->setCallerName($callerName);
-                    $caller->setIsFetched(1);
-                } else {
-                    log::add('livebox','debug','store it but not fetched');
-                    $caller->setCallerName('');
-                    $caller->setIsFetched(0);
-                }
+				if ($this->_pagesJaunesRequests < self::MAX_PAGESJAUNES && strlen($num) == 10) {
+					log::add('livebox','debug','we fetch the name');
+					$this->_pagesJaunesRequests++;
+					$callerName = $this->getPjCallerName($normalizedPhone);
+					$caller->setCallerName($callerName);
+					$caller->setIsFetched(1);
+				} else {
+					log::add('livebox','debug','store it but not fetched');
+					$caller->setCallerName('');
+					$caller->setIsFetched(0);
+				}
 			} else {
 				$caller->setCallerName('_');
 				$caller->setIsFetched(0);
@@ -1656,26 +1740,20 @@ class livebox extends eqLogic {
 			if ($caller->getIsFetched() == 0) {
 				log::add('livebox','debug','but it is not fetched');
 				if($usepagesjaunes == 1) {
-                    if ($this->_pagesJaunesRequests < self::MAX_PAGESJAUNES && strlen($num) == 10) {
-                        log::add('livebox','debug','we fetch the name');
-                        $this->_pagesJaunesRequests++;
-                        $callerName = $this->getPjCallerName($normalizedPhone);
-                        log::add('livebox','debug','response from pages jaunes '.$callerName);
-                        $caller->setCallerName($callerName);
-                        $caller->setIsFetched(1);
-                        log::add('livebox','debug','and we save it');
-                        $caller->save();
-                    }
-			    }
-		    }
-	    }
+					if ($this->_pagesJaunesRequests < self::MAX_PAGESJAUNES && strlen($num) == 10) {
+						log::add('livebox','debug','we fetch the name');
+						$this->_pagesJaunesRequests++;
+						$callerName = $this->getPjCallerName($normalizedPhone);
+						log::add('livebox','debug','response from pages jaunes '.$callerName);
+						$caller->setCallerName($callerName);
+						$caller->setIsFetched(1);
+						log::add('livebox','debug','and we save it');
+						$caller->save();
+					}
+				}
+			}
+		}
 		return $caller->getCallerName();
-	}
-
-	function format_time($isodate) {
-		$date = new DateTime($isodate, new DateTimeZone('UTC'));
-		date_timezone_set($date,  new DateTimeZone(config::byKey('timezone')));
-		return $date->format('Y-m-d H:i:s');
 	}
 
 	function fmt_date($timeStamp) {
