@@ -3,6 +3,29 @@
 	$('#md_modal').load('index.php?v=d&plugin=livebox&modal=health').dialog('open');
 });
 
+$('#in_searchEqlogic2').off('keyup').keyup(function () {
+  var search = $(this).value().toLowerCase();
+  search = search.normalize('NFD').replace(/[\u0300-\u036f]/g, "")
+  if(search == ''){
+    $('.eqLogicDisplayCard.second').show();
+    $('.eqLogicThumbnailContainer.second').packery();
+    return;
+  }
+  $('.eqLogicDisplayCard.second').hide();
+  $('.eqLogicDisplayCard.second .name').each(function(){
+    var text = $(this).text().toLowerCase();
+    text = text.normalize('NFD').replace(/[\u0300-\u036f]/g, "")
+    if(text.indexOf(search) >= 0){
+      $(this).closest('.eqLogicDisplayCard.second').show();
+    }
+  });
+  $('.eqLogicThumbnailContainer.second').packery();
+});
+$('#bt_resetEqlogicSearch2').on('click', function () {
+  $('#in_searchEqlogic2').val('')
+  $('#in_searchEqlogic2').keyup()
+})
+
 $('.eqLogicAttr[data-l1key=configuration][data-l2key=type]').on('change',function(){
 	if ($(this).value() == 'box') {
 		$('#div_goCarte').show();

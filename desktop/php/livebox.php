@@ -41,47 +41,61 @@ foreach ($eqLogics as $eqLogic) {
 	</div>
 		<legend><i class="fas fa-table"></i>{{Mes Livebox}}
 		</legend>
-		<div class="eqLogicThumbnailContainer">
-			<?php
-			if($has['box']) {
-				foreach ($eqLogics as $eqLogic) {
-					if($eqLogic->getConfiguration('type','') != 'box') {
-						continue;
-					}
-					$opacity = ($eqLogic->getIsEnable()) ? '' : 'disableCard';
-					echo '<div class="eqLogicDisplayCard cursor '.$opacity.'" data-eqLogic_id="' . $eqLogic->getId() . '">';
-					echo '<img src="' . $eqLogic->getImage() . '"/>';
-					echo '<br>';
-					echo '<span class="name">' . $eqLogic->getHumanName(true, true) . '</span>';
-					echo '</div>';
-				}
-			} else {
-				echo "<br/><br/><br/><center><span style='color:#767676;font-size:1.2em;font-weight: bold;'>{{Vous n'avez pas encore de Livebox, cliquez sur Ajouter un équipement pour commencer}}</span></center>";
-			}
-			?>
+		<div class="panel">
+			<div class="panel-body">
+                <div class="eqLogicThumbnailContainer ">
+                    <?php
+                    if($has['box']) {
+                        foreach ($eqLogics as $eqLogic) {
+                            if($eqLogic->getConfiguration('type','') != 'box') {
+                                continue;
+                            }
+                            $opacity = ($eqLogic->getIsEnable()) ? '' : 'disableCard';
+                            echo '<div class="eqLogicDisplayCard cursor '.$opacity.'" data-eqLogic_id="' . $eqLogic->getId() . '">';
+                            echo '<img src="' . $eqLogic->getImage() . '"/>';
+                            echo '<br>';
+                            echo '<span class="name">' . $eqLogic->getHumanName(true, true) . '</span>';
+                            echo '</div>';
+                        }
+                    } else {
+                        echo "<br/><br/><br/><center><span style='color:#767676;font-size:1.2em;font-weight: bold;'>{{Vous n'avez pas encore de Livebox, cliquez sur Ajouter un équipement pour commencer}}</span></center>";
+                    }
+                    ?>
 
-		</div>
+                </div>
+            </div>
+        </div>
 		<legend><i class="fas fa-table"></i> {{Mes Clients}} <span class="cursor eqLogicAction" style="color:#fcc127" data-action="discover" data-action2="clients" title="{{Scanner les clients}}"><i class="fas fa-bullseye"></i></span>&nbsp;<span class="cursor eqLogicAction" style="color:#fcc127" data-action="delete" data-action2="clients" title="{{Supprimer Clients non-actifs (et ignorer lors des prochaines sync)}}"><i class="fas fa-trash"></i></span></legend>
-		<div class="eqLogicThumbnailContainer">
-			<?php
-			if($has['cli']) {
-				foreach ($eqLogics as $eqLogic) {
-					if($eqLogic->getConfiguration('type','') != 'cli') {
-						continue;
-					}
-					$opacity = ($eqLogic->getIsEnable()) ? '' : 'disableCard';
-					echo '<div class="eqLogicDisplayCard cursor '.$opacity.'" data-eqLogic_id="' . $eqLogic->getId() . '">';
-					echo '<img src="' . $eqLogic->getImage() . '"/>';
-					echo '<br>';
-					echo '<span class="name">' . $eqLogic->getHumanName(true, true) . '</span>';
-					echo '</div>';
-				}
-			} else {
-				echo "<br/><br/><br/><center><span style='color:#767676;font-size:1.2em;font-weight: bold;'>{{Scannez les clients pour les créer}}</span></center>";
-			}
-			?>
-
+		<div class="input-group" style="margin-bottom:5px;">
+			<input class="form-control roundedLeft" placeholder="{{Rechercher}}" id="in_searchEqlogic2" />
+			<div class="input-group-btn">
+				<a id="bt_resetEqlogicSearch2" class="btn roundedRight" style="width:30px"><i class="fas fa-times"></i></a>
+			</div>
 		</div>
+        <div class="panel">
+			<div class="panel-body">
+                <div class="eqLogicThumbnailContainer  second">
+                    <?php
+                    if($has['cli']) {
+                        foreach ($eqLogics as $eqLogic) {
+                            if($eqLogic->getConfiguration('type','') != 'cli') {
+                                continue;
+                            }
+                            $opacity = ($eqLogic->getIsEnable()) ? '' : 'disableCard';
+                            echo '<div class="eqLogicDisplayCard cursor  second'.$opacity.'" data-eqLogic_id="' . $eqLogic->getId() . '">';
+                            echo '<img src="' . $eqLogic->getImage() . '"/>';
+                            echo '<br>';
+                            echo '<span class="name">' . $eqLogic->getHumanName(true, true) . '</span>';
+                            echo '</div>';
+                        }
+                    } else {
+                        echo "<br/><br/><br/><center><span style='color:#767676;font-size:1.2em;font-weight: bold;'>{{Scannez les clients pour les créer}}</span></center>";
+                    }
+                    ?>
+
+                </div>
+            </div>
+        </div>
 	</div>
 </div>
 	<div class="col-lg-10 col-md-9 col-sm-8 eqLogic" style="border-left: solid 1px #EEE; padding-left: 25px;display: none;">
