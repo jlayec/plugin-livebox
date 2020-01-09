@@ -66,7 +66,6 @@ try {
 				$param=init('what');
 			else
 				$param=null;
-			log::add('livebox','debug','synchronisation manuelle : '.init('what'));
 			livebox::syncLivebox($param);
 			ajax::success();
 			break;
