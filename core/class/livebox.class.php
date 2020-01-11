@@ -1138,7 +1138,7 @@ class livebox extends eqLogic {
 				$cmd->setType('info');
 				$cmd->setSubType('string');
 				$cmd->setGeneric_type( 'GENERIC_INFO');
-				$cmd->setIsVisible(1);
+				$cmd->setIsVisible(0);
 				$cmd->setIsHistorized(0);
 				$cmd->save();
 			}
@@ -1151,7 +1151,7 @@ class livebox extends eqLogic {
 				$cmd->setType('info');
 				$cmd->setSubType('string');
 				$cmd->setGeneric_type( 'GENERIC_INFO');
-				$cmd->setIsVisible(1);
+				$cmd->setIsVisible(0);
 				$cmd->setIsHistorized(0);
 				$cmd->save();
 			}
@@ -1164,7 +1164,7 @@ class livebox extends eqLogic {
 				$cmd->setType('info');
 				$cmd->setSubType('string');
 				$cmd->setGeneric_type( 'GENERIC_INFO');
-				$cmd->setIsVisible(1);
+				$cmd->setIsVisible(0);
 				$cmd->setIsHistorized(0);
 				$cmd->save();
 			}
@@ -1282,17 +1282,17 @@ class livebox extends eqLogic {
 	}
     function refreshClientInfo($client, $lbcli) {
         $clicmd = $lbcli->getCmd(null, 'lastlogin');
-        if (is_object($clicmd) && isset($client["LastConnection"])) {
+        if (is_object($clicmd) && isset($client["LastConnection"]) && $client["LastConnection"] !== '') {
                 $value = livebox::format_time($client['LastConnection']);
                 $lbcli->checkAndUpdateCmd('lastlogin', $value);
         }
         $clicmd = $lbcli->getCmd(null, 'firstseen');
-        if (is_object($clicmd) && isset($client["FirstSeen"])) {
+        if (is_object($clicmd) && isset($client["FirstSeen"]) && $client["FirstSeen"] !== '') {
             $value = livebox::format_time($client['FirstSeen']);
             $lbcli->checkAndUpdateCmd('firstseen', $value);
         }
         $clicmd = $lbcli->getCmd(null, 'lastchanged');
-        if (is_object($clicmd) && isset($client["LastChanged"])) {
+        if (is_object($clicmd) && isset($client["LastChanged"]) && $client["LastChanged"] !== '') {
                 $value = livebox::format_time($client['LastChanged']);
                 $lbcli->checkAndUpdateCmd('lastchanged', $value);
         }
