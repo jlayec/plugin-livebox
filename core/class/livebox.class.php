@@ -532,6 +532,7 @@ class livebox extends eqLogic {
 	}
 
 	public function postSave() {
+		$reapplyDefaultWidget = true; // implementation temporaire
 		if ($this->getConfiguration('type','') == 'box') {
 		$refresh = $this->getCmd(null, 'refresh');
 		if (!is_object($refresh)) {
@@ -560,7 +561,15 @@ class livebox extends eqLogic {
 						$cmd->setType('info');
 						$cmd->setSubType('numeric');
 						$cmd->setIsHistorized(0);
+						$applyDefaultWidget = true;
 					}
+					if ($reapplyDefaultWidget || $applyDefaultWidget) {
+						log::add('livebox', 'info', 'test');
+						$cmd->setOrder(71);
+						$cmd->setIsVisible(0);
+						log::add('livebox', 'info', 'test2');
+					}
+					$applyDefaultWidget = false;
 					$cmd->save();
 
 					$cmd = $this->getCmd(null, 'debitdescendant');
@@ -573,7 +582,12 @@ class livebox extends eqLogic {
 						$cmd->setType('info');
 						$cmd->setSubType('numeric');
 						$cmd->setIsHistorized(0);
+						$applyDefaultWidget = true;
 					}
+					if ($reapplyDefaultWidget || $applyDefaultWidget) {
+						$cmd->setOrder(72);
+					}
+					$applyDefaultWidget = false;
 					$cmd->save();
 
 					$cmd = $this->getCmd(null, 'margebruitmontant');
@@ -586,7 +600,12 @@ class livebox extends eqLogic {
 						$cmd->setType('info');
 						$cmd->setSubType('numeric');
 						$cmd->setIsHistorized(0);
+						$applyDefaultWidget = true;
 					}
+					if ($reapplyDefaultWidget || $applyDefaultWidget) {
+						$cmd->setOrder(73);
+					}
+					$applyDefaultWidget = false;
 					$cmd->save();
 
 					$cmd = $this->getCmd(null, 'margebruitdescendant');
@@ -599,7 +618,12 @@ class livebox extends eqLogic {
 						$cmd->setType('info');
 						$cmd->setSubType('numeric');
 						$cmd->setIsHistorized(0);
+						$applyDefaultWidget = true;
 					}
+					if ($reapplyDefaultWidget || $applyDefaultWidget) {
+						$cmd->setOrder(74);
+					}
+					$applyDefaultWidget = false;
 					$cmd->save();
 
 					$cmd = $this->getCmd(null, 'lastchange');
@@ -612,15 +636,20 @@ class livebox extends eqLogic {
 						$cmd->setType('info');
 						$cmd->setSubType('numeric');
 						$cmd->setIsHistorized(1);
+						$applyDefaultWidget = true;
+					}
+					if ($reapplyDefaultWidget || $applyDefaultWidget) {
+						$cmd->setOrder(75);
 						if (version_compare(jeedom::version(), "4.4", "<")) {
 							$cmd->setTemplate('dashboard', 'livebox::duree');
 							$cmd->setTemplate('mobile', 'livebox::duree');
 						}
+						if (version_compare(jeedom::version(), "4.4", ">")) {
+							$cmd->setDisplay('forceReturnLineBefore', 1);
+							$cmd->setDisplay('forceReturnLineAfter', 1);
+						}
 					}
-					if (version_compare(jeedom::version(), "4.4", ">")) {
-						$cmd->setDisplay('forceReturnLineBefore', 1);
-						$cmd->setDisplay('forceReturnLineAfter', 1);
-					}
+					$applyDefaultWidget = false;
 					$cmd->save();
 
 				} elseif ( $content->data->LinkType == "ethernet" ) {
@@ -663,7 +692,12 @@ class livebox extends eqLogic {
 						$cmd->setType('action');
 						$cmd->setSubType('other');
 						$cmd->setLogicalId('wifion');
+						$applyDefaultWidget = true;
 					}
+					if ($reapplyDefaultWidget || $applyDefaultWidget) {
+						$cmd->setOrder(21);
+					}
+					$applyDefaultWidget = false;
 					$cmd->save();
 
 					$cmd = $this->getCmd(null, 'wifioff');
@@ -674,7 +708,12 @@ class livebox extends eqLogic {
 						$cmd->setType('action');
 						$cmd->setSubType('other');
 						$cmd->setLogicalId('wifioff');
+						$applyDefaultWidget = true;
 					}
+					if ($reapplyDefaultWidget || $applyDefaultWidget) {
+						$cmd->setOrder(31);
+					}
+					$applyDefaultWidget = false;
 					$cmd->save();
 
 					$cmd = $this->getCmd(null, 'wifi2.4on');
@@ -716,7 +755,12 @@ class livebox extends eqLogic {
 						$cmd->setType('info');
 						$cmd->setSubType('binary');
 						$cmd->setIsHistorized(0);
+						$applyDefaultWidget = true;
 					}
+					if ($reapplyDefaultWidget || $applyDefaultWidget) {
+						$cmd->setOrder(15);
+					}
+					$applyDefaultWidget = false;
 					$cmd->save();
 
 					$cmd = $this->getCmd(null, 'wifi5status');
@@ -743,7 +787,12 @@ class livebox extends eqLogic {
 						$cmd->setType('action');
 						$cmd->setSubType('other');
 						$cmd->setLogicalId('wifi2.4on');
+						$applyDefaultWidget = true;
 					}
+					if ($reapplyDefaultWidget || $applyDefaultWidget) {
+						$cmd->setOrder(22);
+					}
+					$applyDefaultWidget = false;
 					$cmd->save();
 
 					$cmd = $this->getCmd(null, 'wifi5on');
@@ -754,7 +803,12 @@ class livebox extends eqLogic {
 						$cmd->setType('action');
 						$cmd->setSubType('other');
 						$cmd->setLogicalId('wifi5on');
+						$applyDefaultWidget = true;
 					}
+					if ($reapplyDefaultWidget || $applyDefaultWidget) {
+						$cmd->setOrder(23);
+					}
+					$applyDefaultWidget = false;
 					$cmd->save();
 
 					$cmd = $this->getCmd(null, 'wifi2.4off');
@@ -765,7 +819,12 @@ class livebox extends eqLogic {
 						$cmd->setType('action');
 						$cmd->setSubType('other');
 						$cmd->setLogicalId('wifi2.4off');
+						$applyDefaultWidget = true;
 					}
+					if ($reapplyDefaultWidget || $applyDefaultWidget) {
+						$cmd->setOrder(32);
+					}
+					$applyDefaultWidget = false;
 					$cmd->save();
 
 					$cmd = $this->getCmd(null, 'wifi5off');
@@ -776,7 +835,12 @@ class livebox extends eqLogic {
 						$cmd->setType('action');
 						$cmd->setSubType('other');
 						$cmd->setLogicalId('wifi5off');
+						$applyDefaultWidget = true;
 					}
+					if ($reapplyDefaultWidget || $applyDefaultWidget) {
+						$cmd->setOrder(33);
+					}
+					$applyDefaultWidget = false;
 					$cmd->save();
 
 					$cmd = $this->getCmd(null, 'wifioff');
@@ -799,7 +863,12 @@ class livebox extends eqLogic {
 						$cmd->setType('info');
 						$cmd->setSubType('binary');
 						$cmd->setIsHistorized(0);
+						$applyDefaultWidget = true;
 					}
+					if ($reapplyDefaultWidget || $applyDefaultWidget) {
+						$cmd->setOrder(17);
+					}
+					$applyDefaultWidget = false;
 					$cmd->save();
 
 					$cmd = $this->getCmd(null, 'wifi2.4status');
@@ -812,7 +881,12 @@ class livebox extends eqLogic {
 						$cmd->setType('info');
 						$cmd->setSubType('binary');
 						$cmd->setIsHistorized(0);
+						$applyDefaultWidget = true;
 					}
+					if ($reapplyDefaultWidget || $applyDefaultWidget) {
+						$cmd->setOrder(16);
+					}
+					$applyDefaultWidget = false;
 					$cmd->save();
 
 					$cmd = $this->getCmd(null, 'wifistatus');
@@ -829,7 +903,12 @@ class livebox extends eqLogic {
 						$cmd->setType('action');
 						$cmd->setSubType('other');
 						$cmd->setLogicalId('wifi2.4on');
+						$applyDefaultWidget = true;
 					}
+					if ($reapplyDefaultWidget || $applyDefaultWidget) {
+						$cmd->setOrder(22);
+					}
+					$applyDefaultWidget = false;
 					$cmd->save();
 
 					$cmd = $this->getCmd(null, 'wifi5on');
@@ -840,7 +919,12 @@ class livebox extends eqLogic {
 						$cmd->setType('action');
 						$cmd->setSubType('other');
 						$cmd->setLogicalId('wifi5on');
+						$applyDefaultWidget = true;
 					}
+					if ($reapplyDefaultWidget || $applyDefaultWidget) {
+						$cmd->setOrder(23);
+					}
+					$applyDefaultWidget = false;
 					$cmd->save();
 
 					$cmd = $this->getCmd(null, 'wifi6on');
@@ -851,7 +935,12 @@ class livebox extends eqLogic {
 						$cmd->setType('action');
 						$cmd->setSubType('other');
 						$cmd->setLogicalId('wifi6on');
+						$applyDefaultWidget = true;
 					}
+					if ($reapplyDefaultWidget || $applyDefaultWidget) {
+						$cmd->setOrder(24);
+					}
+					$applyDefaultWidget = false;
 					$cmd->save();
 
 					$cmd = $this->getCmd(null, 'wifi2.4off');
@@ -862,7 +951,12 @@ class livebox extends eqLogic {
 						$cmd->setType('action');
 						$cmd->setSubType('other');
 						$cmd->setLogicalId('wifi2.4off');
+						$applyDefaultWidget = true;
 					}
+					if ($reapplyDefaultWidget || $applyDefaultWidget) {
+						$cmd->setOrder(32);
+					}
+					$applyDefaultWidget = false;
 					$cmd->save();
 
 					$cmd = $this->getCmd(null, 'wifi5off');
@@ -873,7 +967,12 @@ class livebox extends eqLogic {
 						$cmd->setType('action');
 						$cmd->setSubType('other');
 						$cmd->setLogicalId('wifi5off');
+						$applyDefaultWidget = true;
 					}
+					if ($reapplyDefaultWidget || $applyDefaultWidget) {
+						$cmd->setOrder(33);
+					}
+					$applyDefaultWidget = false;
 					$cmd->save();
 
 					$cmd = $this->getCmd(null, 'wifi6off');
@@ -884,7 +983,12 @@ class livebox extends eqLogic {
 						$cmd->setType('action');
 						$cmd->setSubType('other');
 						$cmd->setLogicalId('wifi6off');
+						$applyDefaultWidget = true;
 					}
+					if ($reapplyDefaultWidget || $applyDefaultWidget) {
+						$cmd->setOrder(34);
+					}
+					$applyDefaultWidget = false;
 					$cmd->save();
 
 					$cmd = $this->getCmd(null, 'wifioff');
@@ -907,7 +1011,12 @@ class livebox extends eqLogic {
 						$cmd->setType('info');
 						$cmd->setSubType('binary');
 						$cmd->setIsHistorized(0);
+						$applyDefaultWidget = true;
 					}
+					if ($reapplyDefaultWidget || $applyDefaultWidget) {
+						$cmd->setOrder(17);
+					}
+					$applyDefaultWidget = false;
 					$cmd->save();
 
 					$cmd = $this->getCmd(null, 'wifi2.4status');
@@ -920,7 +1029,12 @@ class livebox extends eqLogic {
 						$cmd->setType('info');
 						$cmd->setSubType('binary');
 						$cmd->setIsHistorized(0);
+						$applyDefaultWidget = true;
 					}
+					if ($reapplyDefaultWidget || $applyDefaultWidget) {
+						$cmd->setOrder(16);
+					}
+					$applyDefaultWidget = false;
 					$cmd->save();
 
 					$cmd = $this->getCmd(null, 'wifi6status');
@@ -933,7 +1047,12 @@ class livebox extends eqLogic {
 						$cmd->setType('info');
 						$cmd->setSubType('binary');
 						$cmd->setIsHistorized(0);
+						$applyDefaultWidget = true;
 					}
+					if ($reapplyDefaultWidget || $applyDefaultWidget) {
+						$cmd->setOrder(18);
+					}
+					$applyDefaultWidget = false;
 					$cmd->save();
 
 					$cmd = $this->getCmd(null, 'wifistatus');
@@ -952,7 +1071,12 @@ class livebox extends eqLogic {
 							$cmd->setType('action');
 							$cmd->setSubType('other');
 							$cmd->setLogicalId('guestwifion');
+							$applyDefaultWidget = true;
 						}
+						if ($reapplyDefaultWidget || $applyDefaultWidget) {
+							$cmd->setOrder(25);
+						}
+						$applyDefaultWidget = false;
 						$cmd->save();
 
 						$cmd = $this->getCmd(null, 'guestwifioff');
@@ -963,7 +1087,12 @@ class livebox extends eqLogic {
 							$cmd->setType('action');
 							$cmd->setSubType('other');
 							$cmd->setLogicalId('guestwifioff');
+							$applyDefaultWidget = true;
 						}
+						if ($reapplyDefaultWidget || $applyDefaultWidget) {
+							$cmd->setOrder(35);
+						}
+						$applyDefaultWidget = false;
 						$cmd->save();
 
 						$cmd = $this->getCmd(null, 'guestwifistatus');
@@ -976,7 +1105,12 @@ class livebox extends eqLogic {
 							$cmd->setType('info');
 							$cmd->setSubType('binary');
 							$cmd->setIsHistorized(0);
+							$applyDefaultWidget = true;
 						}
+						if ($reapplyDefaultWidget || $applyDefaultWidget) {
+							$cmd->setOrder(19);
+						}
+						$applyDefaultWidget = false;
 						$cmd->save();
 
 					} else {
@@ -1022,7 +1156,12 @@ class livebox extends eqLogic {
 								$cmd->setSubType('binary');
 								$cmd->setIsHistorized(0);
 								$cmd->setIsVisible(1);
+								$applyDefaultWidget = true;
 							}
+							if ($reapplyDefaultWidget || $applyDefaultWidget) {
+								$cmd->setOrder(14);
+							}
+							$applyDefaultWidget = false;
 							$cmd->save();
 
 							$cmd = $this->getCmd(null, 'numerotelephone'.$voip["signalingProtocol"]);
@@ -1036,11 +1175,16 @@ class livebox extends eqLogic {
 								$cmd->setSubType('string');
 								$cmd->setIsHistorized(0);
 								$cmd->setIsVisible(1);
+								$applyDefaultWidget = true;
 							}
-							if (version_compare(jeedom::version(), "4.4", ">")) {
-								$cmd->setDisplay('forceReturnLineBefore', 1);
-								$cmd->setDisplay('forceReturnLineAfter', 1);
+							if ($reapplyDefaultWidget || $applyDefaultWidget) {
+								$cmd->setOrder(83);
+								if (version_compare(jeedom::version(), "4.4", ">")) {
+									$cmd->setDisplay('forceReturnLineBefore', 1);
+									$cmd->setDisplay('forceReturnLineAfter', 1);
+								}
 							}
+							$applyDefaultWidget = false;
 							$cmd->save();
 
 						} else {
@@ -1069,11 +1213,16 @@ class livebox extends eqLogic {
 					$cmd->setSubType('numeric');
 					$cmd->setIsHistorized(0);
 					$cmd->setTemplate('dashboard', 'line');
+					$applyDefaultWidget = true;
 				}
-				if (version_compare(jeedom::version(), "4.4", ">")) {
-					$cmd->setDisplay('forceReturnLineBefore', 1);
-					$cmd->setDisplay('forceReturnLineAfter', 1);
+				if ($reapplyDefaultWidget || $applyDefaultWidget) {
+					$cmd->setOrder(41);
+					if (version_compare(jeedom::version(), "4.4", ">")) {
+						$cmd->setDisplay('forceReturnLineBefore', 1);
+						$cmd->setDisplay('forceReturnLineAfter', 1);
+					}
 				}
+				$applyDefaultWidget = false;
 				$cmd->save();
 
 				$cmd = $this->getCmd(null, 'incallsnumber');
@@ -1087,11 +1236,16 @@ class livebox extends eqLogic {
 					$cmd->setSubType('numeric');
 					$cmd->setIsHistorized(0);
 					$cmd->setTemplate('dashboard', 'line');
+					$applyDefaultWidget = true;
 				}
-				if (version_compare(jeedom::version(), "4.4", ">")) {
-					$cmd->setDisplay('forceReturnLineBefore', 1);
-					$cmd->setDisplay('forceReturnLineAfter', 1);
+				if ($reapplyDefaultWidget || $applyDefaultWidget) {
+					$cmd->setOrder(42);
+					if (version_compare(jeedom::version(), "4.4", ">")) {
+						$cmd->setDisplay('forceReturnLineBefore', 1);
+						$cmd->setDisplay('forceReturnLineAfter', 1);
+					}
 				}
+				$applyDefaultWidget = false;
 				$cmd->save();
 
 				$cmd = $this->getCmd(null, 'outcallsnumber');
@@ -1105,11 +1259,16 @@ class livebox extends eqLogic {
 					$cmd->setSubType('numeric');
 					$cmd->setIsHistorized(0);
 					$cmd->setTemplate('dashboard', 'line');
+					$applyDefaultWidget = true;
 				}
-				if (version_compare(jeedom::version(), "4.4", ">")) {
-					$cmd->setDisplay('forceReturnLineBefore', 1);
-					$cmd->setDisplay('forceReturnLineAfter', 1);
+				if ($reapplyDefaultWidget || $applyDefaultWidget) {
+					$cmd->setOrder(43);
+					if (version_compare(jeedom::version(), "4.4", ">")) {
+						$cmd->setDisplay('forceReturnLineBefore', 1);
+						$cmd->setDisplay('forceReturnLineAfter', 1);
+					}
 				}
+				$applyDefaultWidget = false;
 				$cmd->save();
 
 				$cmd = $this->getCmd(null, 'totalcallsnumber');
@@ -1124,11 +1283,16 @@ class livebox extends eqLogic {
 					$cmd->setIsHistorized(0);
 					$cmd->setIsVisible(0);
 					$cmd->setTemplate('dashboard', 'line');
+					$applyDefaultWidget = true;
 				}
-				if (version_compare(jeedom::version(), "4.4", ">")) {
-					$cmd->setDisplay('forceReturnLineBefore', 1);
-					$cmd->setDisplay('forceReturnLineAfter', 1);
+				if ($reapplyDefaultWidget || $applyDefaultWidget) {
+					$cmd->setOrder(44);
+					if (version_compare(jeedom::version(), "4.4", ">")) {
+						$cmd->setDisplay('forceReturnLineBefore', 1);
+						$cmd->setDisplay('forceReturnLineAfter', 1);
+					}
 				}
+				$applyDefaultWidget = false;
 				$cmd->save();
 
 				$cmd = $this->getCmd(null, 'outcallstable');
@@ -1142,9 +1306,14 @@ class livebox extends eqLogic {
 					$cmd->setSubType('string');
 					$cmd->setIsVisible(0);
 					$cmd->setIsHistorized(0);
-						$cmd->setTemplate('dashboard', 'livebox::deroulant');
-						$cmd->setTemplate('mobile', 'livebox::deroulant');
-					}
+					$cmd->setTemplate('dashboard', 'livebox::deroulant');
+					$cmd->setTemplate('mobile', 'livebox::deroulant');
+					$applyDefaultWidget = true;
+				}
+				if ($reapplyDefaultWidget || $applyDefaultWidget) {
+					$cmd->setOrder(53);
+				}
+				$applyDefaultWidget = false;
 				$cmd->save();
 
 				$cmd = $this->getCmd(null, 'incallstable');
@@ -1158,9 +1327,14 @@ class livebox extends eqLogic {
 					$cmd->setSubType('string');
 					$cmd->setIsVisible(0);
 					$cmd->setIsHistorized(0);
-						$cmd->setTemplate('dashboard', 'livebox::deroulant');
-						$cmd->setTemplate('mobile', 'livebox::deroulant');
-					}
+					$cmd->setTemplate('dashboard', 'livebox::deroulant');
+					$cmd->setTemplate('mobile', 'livebox::deroulant');
+					$applyDefaultWidget = true;
+				}
+				if ($reapplyDefaultWidget || $applyDefaultWidget) {
+					$cmd->setOrder(52);
+				}
+				$applyDefaultWidget = false;
 				$cmd->save();
 
 				$cmd = $this->getCmd(null, 'missedcallstable');
@@ -1174,9 +1348,14 @@ class livebox extends eqLogic {
 					$cmd->setSubType('string');
 					$cmd->setIsVisible(0);
 					$cmd->setIsHistorized(0);
-						$cmd->setTemplate('dashboard', 'livebox::deroulant');
-						$cmd->setTemplate('mobile', 'livebox::deroulant');
-					}
+					$cmd->setTemplate('dashboard', 'livebox::deroulant');
+					$cmd->setTemplate('mobile', 'livebox::deroulant');
+					$applyDefaultWidget = true;
+				}
+				if ($reapplyDefaultWidget || $applyDefaultWidget) {
+					$cmd->setOrder(51);
+				}
+				$applyDefaultWidget = false;
 				$cmd->save();
 
 				$cmd = $this->getCmd(null, 'callstable');
@@ -1189,9 +1368,14 @@ class livebox extends eqLogic {
 					$cmd->setType('info');
 					$cmd->setSubType('string');
 					$cmd->setIsHistorized(0);
-						$cmd->setTemplate('dashboard', 'livebox::deroulant');
-						$cmd->setTemplate('mobile', 'livebox::deroulant');
-					}
+					$cmd->setTemplate('dashboard', 'livebox::deroulant');
+					$cmd->setTemplate('mobile', 'livebox::deroulant');
+					$applyDefaultWidget = true;
+				}
+				if ($reapplyDefaultWidget || $applyDefaultWidget) {
+					$cmd->setOrder(54);
+				}
+				$applyDefaultWidget = false;
 				$cmd->save();
 
 				$cmd = $this->getCmd(null, 'lastmissedcall');
@@ -1204,11 +1388,16 @@ class livebox extends eqLogic {
 					$cmd->setType('info');
 					$cmd->setSubType('string');
 					$cmd->setIsHistorized(0);
+					$applyDefaultWidget = true;
 				}
-				if (version_compare(jeedom::version(), "4.4", ">")) {
-					$cmd->setDisplay('forceReturnLineBefore', 1);
-					$cmd->setDisplay('forceReturnLineAfter', 1);
+				if ($reapplyDefaultWidget || $applyDefaultWidget) {
+					$cmd->setOrder(61);
+					if (version_compare(jeedom::version(), "4.4", ">")) {
+						$cmd->setDisplay('forceReturnLineBefore', 1);
+						$cmd->setDisplay('forceReturnLineAfter', 1);
+					}
 				}
+				$applyDefaultWidget = false;
 				$cmd->save();
 
 				$cmd = $this->getCmd(null, 'lastincomingcall');
@@ -1221,11 +1410,16 @@ class livebox extends eqLogic {
 					$cmd->setType('info');
 					$cmd->setSubType('string');
 					$cmd->setIsHistorized(0);
+					$applyDefaultWidget = true;
 				}
-				if (version_compare(jeedom::version(), "4.4", ">")) {
-					$cmd->setDisplay('forceReturnLineBefore', 1);
-					$cmd->setDisplay('forceReturnLineAfter', 1);
+				if ($reapplyDefaultWidget || $applyDefaultWidget) {
+					$cmd->setOrder(62);
+					if (version_compare(jeedom::version(), "4.4", ">")) {
+						$cmd->setDisplay('forceReturnLineBefore', 1);
+						$cmd->setDisplay('forceReturnLineAfter', 1);
+					}
 				}
+				$applyDefaultWidget = false;
 				$cmd->save();
 
 				$cmd = $this->getCmd(null, 'lastoutgoingcall');
@@ -1238,11 +1432,16 @@ class livebox extends eqLogic {
 					$cmd->setType('info');
 					$cmd->setSubType('string');
 					$cmd->setIsHistorized(0);
+					$applyDefaultWidget = true;
 				}
-				if (version_compare(jeedom::version(), "4.4", ">")) {
-					$cmd->setDisplay('forceReturnLineBefore', 1);
-					$cmd->setDisplay('forceReturnLineAfter', 1);
+				if ($reapplyDefaultWidget || $applyDefaultWidget) {
+					$cmd->setOrder(63);
+					if (version_compare(jeedom::version(), "4.4", ">")) {
+						$cmd->setDisplay('forceReturnLineBefore', 1);
+						$cmd->setDisplay('forceReturnLineAfter', 1);
+					}
 				}
+				$applyDefaultWidget = false;
 				$cmd->save();
 			}
 
@@ -1256,11 +1455,16 @@ class livebox extends eqLogic {
 				$cmd->setType('info');
 				$cmd->setSubType('string');
 				$cmd->setIsHistorized(0);
+				$applyDefaultWidget = true;
 			}
-			if (version_compare(jeedom::version(), "4.4", ">")) {
-				$cmd->setDisplay('forceReturnLineBefore', 1);
-				$cmd->setDisplay('forceReturnLineAfter', 1);
+			if ($reapplyDefaultWidget || $applyDefaultWidget) {
+				$cmd->setOrder(1);
+				if (version_compare(jeedom::version(), "4.4", ">")) {
+					$cmd->setDisplay('forceReturnLineBefore', 1);
+					$cmd->setDisplay('forceReturnLineAfter', 1);
+				}
 			}
+			$applyDefaultWidget = false;
 			$cmd->save();
 
 			$cmd = $this->getCmd(null, 'reboot');
@@ -1271,7 +1475,12 @@ class livebox extends eqLogic {
 				$cmd->setType('action');
 				$cmd->setSubType('other');
 				$cmd->setLogicalId('reboot');
+				$applyDefaultWidget = true;
 			}
+			if ($reapplyDefaultWidget || $applyDefaultWidget) {
+				$cmd->setOrder(85);
+			}
+			$applyDefaultWidget = false;
 			$cmd->save();
 
 			$cmd = $this->getCmd(null, 'ring');
@@ -1282,7 +1491,12 @@ class livebox extends eqLogic {
 				$cmd->setType('action');
 				$cmd->setSubType('other');
 				$cmd->setLogicalId('ring');
+				$applyDefaultWidget = true;
 			}
+			if ($reapplyDefaultWidget || $applyDefaultWidget) {
+				$cmd->setOrder(86);
+			}
+			$applyDefaultWidget = false;
 			$cmd->save();
 
 			$cmd = $this->getCmd(null, 'wpspushbutton');
@@ -1293,7 +1507,12 @@ class livebox extends eqLogic {
 				$cmd->setType('action');
 				$cmd->setSubType('other');
 				$cmd->setLogicalId('wpspushbutton');
+				$applyDefaultWidget = true;
 			}
+			if ($reapplyDefaultWidget || $applyDefaultWidget) {
+				$cmd->setOrder(87);
+			}
+			$applyDefaultWidget = false;
 			$cmd->save();
 
 			$cmd = $this->getCmd(null, 'state');
@@ -1306,7 +1525,12 @@ class livebox extends eqLogic {
 				$cmd->setType('info');
 				$cmd->setSubType('binary');
 				$cmd->setIsHistorized(0);
+				$applyDefaultWidget = true;
 			}
+			if ($reapplyDefaultWidget || $applyDefaultWidget) {
+				$cmd->setOrder(10);
+			}
+			$applyDefaultWidget = false;
 			$cmd->save();
 
 			$cmd = $this->getCmd(null, 'uptime');
@@ -1318,16 +1542,21 @@ class livebox extends eqLogic {
 				$cmd->setUnite('s');
 				$cmd->setType('info');
 				$cmd->setSubType('numeric');
+				$cmd->setIsHistorized(0);
+				$applyDefaultWidget = true;
+			}
+			if ($reapplyDefaultWidget || $applyDefaultWidget) {
+				$cmd->setOrder(84);
 				if (version_compare(jeedom::version(), "4.4", "<")) {
 					$cmd->setTemplate('dashboard', 'livebox::duree');
 					$cmd->setTemplate('mobile', 'livebox::duree');
 				}
-				$cmd->setIsHistorized(0);
+				if (version_compare(jeedom::version(), "4.4", ">")) {
+					$cmd->setDisplay('forceReturnLineBefore', 1);
+					$cmd->setDisplay('forceReturnLineAfter', 1);
+				}
 			}
-			if (version_compare(jeedom::version(), "4.4", ">")) {
-				$cmd->setDisplay('forceReturnLineBefore', 1);
-				$cmd->setDisplay('forceReturnLineAfter', 1);
-			}
+			$applyDefaultWidget = false;
 			$cmd->save();
 
 			$cmd = $this->getCmd(null, 'linkstate');
@@ -1340,7 +1569,12 @@ class livebox extends eqLogic {
 				$cmd->setType('info');
 				$cmd->setSubType('binary');
 				$cmd->setIsHistorized(0);
+				$applyDefaultWidget = true;
 			}
+			if ($reapplyDefaultWidget || $applyDefaultWidget) {
+				$cmd->setOrder(11);
+			}
+			$applyDefaultWidget = false;
 			$cmd->save();
 
 			$cmd = $this->getCmd(null, 'connectionstate');
@@ -1353,7 +1587,12 @@ class livebox extends eqLogic {
 				$cmd->setType('info');
 				$cmd->setSubType('binary');
 				$cmd->setIsHistorized(0);
+				$applyDefaultWidget = true;
 			}
+			if ($reapplyDefaultWidget || $applyDefaultWidget) {
+				$cmd->setOrder(12);
+			}
+			$applyDefaultWidget = false;
 			$cmd->save();
 
 			$cmd = $this->getCmd(null, 'tvstatus');
@@ -1366,7 +1605,12 @@ class livebox extends eqLogic {
 				$cmd->setType('info');
 				$cmd->setSubType('binary');
 				$cmd->setIsHistorized(0);
+				$applyDefaultWidget = true;
 			}
+			if ($reapplyDefaultWidget || $applyDefaultWidget) {
+				$cmd->setOrder(13);
+			}
+			$applyDefaultWidget = false;
 			$cmd->save();
 
 			$cmd = $this->getCmd(null, 'ipwan');
@@ -1379,11 +1623,16 @@ class livebox extends eqLogic {
 				$cmd->setType('info');
 				$cmd->setSubType('string');
 				$cmd->setIsHistorized(0);
+				$applyDefaultWidget = true;
 			}
-			if (version_compare(jeedom::version(), "4.4", ">")) {
-				$cmd->setDisplay('forceReturnLineBefore', 1);
-				$cmd->setDisplay('forceReturnLineAfter', 1);
+			if ($reapplyDefaultWidget || $applyDefaultWidget) {
+				$cmd->setOrder(81);
+				if (version_compare(jeedom::version(), "4.4", ">")) {
+					$cmd->setDisplay('forceReturnLineBefore', 1);
+					$cmd->setDisplay('forceReturnLineAfter', 1);
+				}
 			}
+			$applyDefaultWidget = false;
 			$cmd->save();
 
 			$cmd = $this->getCmd(null, 'devicelist');
@@ -1396,11 +1645,16 @@ class livebox extends eqLogic {
 				$cmd->setType('info');
 				$cmd->setSubType('string');
 				$cmd->setIsHistorized(0);
+				$applyDefaultWidget = true;
 			}
-			if (version_compare(jeedom::version(), "4.4", ">")) {
-				$cmd->setDisplay('forceReturnLineBefore', 1);
-				$cmd->setDisplay('forceReturnLineAfter', 1);
+			if ($reapplyDefaultWidget || $applyDefaultWidget) {
+				$cmd->setOrder(40);
+				if (version_compare(jeedom::version(), "4.4", ">")) {
+					$cmd->setDisplay('forceReturnLineBefore', 1);
+					$cmd->setDisplay('forceReturnLineAfter', 1);
+				}
 			}
+			$applyDefaultWidget = false;
 			$cmd->save();
 
 			$cmd = $this->getCmd(null, 'ipv6wan');
@@ -1413,11 +1667,16 @@ class livebox extends eqLogic {
 				$cmd->setType('info');
 				$cmd->setSubType('string');
 				$cmd->setIsHistorized(0);
+				$applyDefaultWidget = true;
 			}
-			if (version_compare(jeedom::version(), "4.4", ">")) {
-				$cmd->setDisplay('forceReturnLineBefore', 1);
-				$cmd->setDisplay('forceReturnLineAfter', 1);
+			if ($reapplyDefaultWidget || $applyDefaultWidget) {
+				$cmd->setOrder(82);
+				if (version_compare(jeedom::version(), "4.4", ">")) {
+					$cmd->setDisplay('forceReturnLineBefore', 1);
+					$cmd->setDisplay('forceReturnLineAfter', 1);
+				}
 			}
+			$applyDefaultWidget = false;
 			$cmd->save();
 
 			$this->refreshInfo();
